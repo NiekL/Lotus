@@ -14,7 +14,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
         </template>
 
         <div class="py-8">
-            <div class="mx-auto sm:px-6 lg:px-8">
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md font-semibold uppercase">Declaratie info</h2>
                     <hr class="mb-4">

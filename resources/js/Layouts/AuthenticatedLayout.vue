@@ -13,9 +13,9 @@ const showingNavigationDropdown = ref(false);
 
 <template>
     <div>
-        <div class="min-h-screen bg-gray-100">
+        <div class="min-h-screen bg-gray-100" id="top-of-app">
             <nav
-                class="bg-white border-b border-gray-200 fixed z-30 w-full bg-white border-b border-gray-200"
+                class="bg-red-50 border-b border-gray-200 fixed z-30 w-full border-b border-gray-200"
             >
                 <div class="mx-auto px-4 lg:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
@@ -47,16 +47,11 @@ const showingNavigationDropdown = ref(false);
 
                                     <template #content>
                                         <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
-                                            Profile
-                                        </DropdownLink>
-                                        <DropdownLink
                                             :href="route('logout')"
                                             method="post"
                                             as="button"
                                         >
-                                            Log Out
+                                            Uitloggen
                                         </DropdownLink>
                                     </template>
                                 </Dropdown>
@@ -142,7 +137,7 @@ const showingNavigationDropdown = ref(false);
                             :href="route('lotus-requests.openlotusrequests')"
                             :active="route().current('lotus-requests.openlotusrequests')"
                         >
-                        <i class="fa-regular fa-calendar-days"></i>Open aanvragen
+                        <i class="fa-regular fa-calendar-days"></i>Beschikbare aanvragen
                         </NavLink>
 
                         <NavLink
@@ -176,6 +171,24 @@ const showingNavigationDropdown = ref(false);
                         >
                             <i class="fa-solid fa-credit-card"></i>Declaratie info
                         </NavLink>
+
+                        <hr>
+
+                        <NavLink
+                            :href="route('profile.invoiceinfo')"
+                            :active="route().current('profile.invoiceinfo')"
+                        >
+                            <i class="fa-solid fa-file-invoice-dollar"></i>Factuurgegevens
+                        </NavLink>
+
+                        <NavLink
+                            :href="route('profile.edit')"
+                            :active="route().current('profile.edit')"
+                        >
+                            <i class="fa-solid fa-user-pen"></i>Profiel
+                        </NavLink>
+
+
 
 
 

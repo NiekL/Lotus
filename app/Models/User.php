@@ -47,6 +47,13 @@ class User extends Authenticatable
 
     public function lotusRequests()
     {
-        return $this->belongsToMany(LotusRequest::class);
+        return $this->belongsToMany(LotusRequest::class)
+            ->withPivot('user_played_time', 'user_amount_km', 'user_feedback')
+            ->withTimestamps();
+    }
+
+    public function billingInfo()
+    {
+        return $this->hasOne(BillingInfo::class);
     }
 }

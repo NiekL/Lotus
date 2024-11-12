@@ -18,11 +18,14 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user();
+
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
         ]);
     }
+
 
     /**
      * Update the user's profile information.
@@ -60,4 +63,38 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    /**
+     * Save or update the user's billing information.
+     */
+    public function saveBillingInfo(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+        $user->billingInfo()->updateOrCreate(
+            [],
+            $request->only('billing_name', 'billing_contactperson', 'billing_phone', 'billing_email', 'billing_address', 'billing_zipcode', 'billing_city')
+        );
+
+        return Redirect::route('profile.invoiceinfo')
+            ->with('status', 'Factuurgegevens succesvol opgeslagen!');
+    }
+
+    public function invoiceInfo(Request $request): Response
+    {
+        $user = $request->user();
+        $billingInfo = $user->billingInfo()->firstOrCreate([], [
+            'billing_name' => '',
+            'billing_contactperson' => '',
+            'billing_phone' => '',
+            'billing_email' => '',
+            'billing_address' => '',
+            'billing_zipcode' => '',
+            'billing_city' => ''
+        ]);
+
+        return Inertia::render('Profile/InvoiceInfo', [
+            'billingInfo' => $billingInfo,
+        ]);
+    }
+
 }

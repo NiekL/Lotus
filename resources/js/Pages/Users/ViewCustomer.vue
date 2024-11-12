@@ -16,7 +16,7 @@ import TextInput from "@/Components/TextInput.vue";
         </template>
         <form>
         <div class="py-8">
-            <div class="mx-auto sm:px-6 lg:px-8">
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
 
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md font-semibold uppercase">Account gegevens</h2>
@@ -69,7 +69,7 @@ import TextInput from "@/Components/TextInput.vue";
         </div>
 
             <div class="pb-8">
-                <div class="mx-auto sm:px-6 lg:px-8">
+                <div class="mx-auto px-2 sm:px-6 lg:px-8">
 
                     <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                         <h2 class="mb-2 text-md font-semibold uppercase">Factuur gegevens</h2>
@@ -157,64 +157,64 @@ import TextInput from "@/Components/TextInput.vue";
                             <table class="w-full text-sm text-left rtl:text-right  text-gray-500 ">
                                 <thead class=" text-gray-700 uppercase text-sm bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         Aanvraag
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         Datum
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         Plaats
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         Tijd
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         Plekken
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         Bekijken
                                     </th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr class="odd:bg-white even:bg-gray-50  border-b hover:bg-gray-200">
-                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                                    <th scope="row" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4 font-medium text-gray-900 whitespace-nowrap">
                                         Aanvraag titel één
                                     </th>
-                                    <td class="px-6 py-4">
+                                    <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         02-03-2024
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         Zwolle
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         14:00 - 18:00
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         4 / <strong>6</strong>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         <a :href="route('lotus-requests.viewlotusrequest')" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out"><i class="fa-solid fa-arrow-right"></i></a>
                                     </td>
                                 </tr>
                                 <tr class="odd:bg-white even:bg-gray-50  border-b hover:bg-gray-200">
-                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                                    <th scope="row" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4 font-medium text-gray-900 whitespace-nowrap">
                                         Aanvraag titel twee
                                     </th>
-                                    <td class="px-6 py-4">
+                                    <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         12-05-2024
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         Staphorst
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         18:00 - 22:00
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         1 / <strong>6</strong>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         <a :href="route('lotus-requests.viewlotusrequest')" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out"><i class="fa-solid fa-arrow-right"></i></a>
                                     </td>
                                 </tr>

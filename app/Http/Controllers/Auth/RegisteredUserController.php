@@ -48,4 +48,30 @@ class RegisteredUserController extends Controller
 
         return redirect(route('dashboard', absolute: false));
     }
+
+    public function storeNewMember(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        event(new Registered($user));
+
+        // Optioneel: Trigger event of doe additionele acties
+
+//        return redirect(route('dashboard'));
+        return redirect()->back()->with('success', 'Gebruiker succesvol aangemaakt.');
+
+    }
+
 }

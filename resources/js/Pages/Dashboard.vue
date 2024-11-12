@@ -1,8 +1,31 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { useForm, Head } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputError from '@/Components/InputError.vue';
+import LotusRequestsTable from "@/Components/LotusRequestsTable.vue";
+import UserLotusRequestsTable from "@/Components/UserLotusRequestsTable.vue";
+import {defineProps} from "vue";
+import InputLabel from "@/Components/InputLabel.vue";
+const props = defineProps({
+    lotusRequests: Array,
+    activeUserLotusRequests: Array,
+    announcements: Array,
+});
 
+console.log(props);
+
+//Announcement form
+const form = useForm({
+    message: '',
+});
+
+//Delete Announcements
+const deleteAnnouncement = (id) => {
+    if (confirm('Weet je zeker dat je deze mededeling wilt verwijderen?')) {
+        form.delete(route('announcements.destroy', id));
+    }
+};
 </script>
 
 <template>
@@ -14,11 +37,38 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
         </template>
 
         <div class="py-8">
-            <div class="mx-auto sm:px-6 lg:px-8">
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md font-semibold uppercase">Mededelingen</h2>
                     <hr class="mb-4">
-                    <p><strong>Let op:</strong> De Lotusles van XX-XX-XXXXX is verplaatst!</p>
+                    <!-- Loop through announcements -->
+                    <div v-if="props.announcements.length === 0">
+                        <p>Er zijn op dit moment geen mededelingen.</p>
+                    </div>
+
+                    <div v-else>
+                        <div v-for="announcement in props.announcements" :key="announcement.id">
+                            <div class="flex justify-between items-start mb-2">
+                                <p class="flex items-start">
+                                    <i class="fa-regular fa-bell mt-1"></i> <!-- mt-1 helpt bij het beter uitlijnen van de bel met de bovenste regel van de tekst -->
+                                    <span class="mx-3">{{ announcement.announcement }}</span>
+                                </p>
+                                <i class="fa-regular fa-trash-can cursor-pointer mt-1 text-red-600" @click="deleteAnnouncement(announcement.id)"></i>
+                            </div>
+                            <hr class="mb-2">
+                        </div>
+
+                    </div>
+
+                    <form @submit.prevent="form.post(route('announcements.store'), { onSuccess: () => form.reset() })">
+                        <textarea
+                            v-model="form.message"
+                            placeholder="Voeg een mededeling toe"
+                            class="mt-6 block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
+                        ></textarea>
+                        <InputError :message="form.errors.message" class="mt-2" />
+                        <PrimaryButton class="mt-4">Mededeling toevoegen</PrimaryButton>
+                    </form>
 
                 </div>
             </div>
@@ -26,247 +76,13 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 
         <div class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
-                <div class="bg-lime-50 overflow-scroll shadow-sm rounded-md sm:rounded-lg border border-gray-200">
-                    <div class="p-6">
-                        <h2 class="mb-2 text-md font-semibold uppercase">Mijn aankomende aanvragen</h2>
-                        <hr class="mb-4">
-                        <div class="relative overflow-x-auto">
-                            <table class="w-full text-sm text-left rtl:text-right  text-gray-500 ">
-                                <thead class=" text-gray-700 uppercase text-sm bg-lime-200">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3">
-                                        Aanvraag
-                                    </th>
-                                    <th scope="col" class="px-6 py-3">
-                                        Datum
-                                    </th>
-                                    <th scope="col" class="px-6 py-3">
-                                        Plaats
-                                    </th>
-                                    <th scope="col" class="px-6 py-3">
-                                        Tijd
-                                    </th>
-                                    <th scope="col" class="px-6 py-3">
-                                        Plekken
-                                    </th>
-                                    <th scope="col" class="px-6 py-3">
-                                        Bekijken
-                                    </th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr class="odd:bg-lime even:bg-lime-100  border-b hover:bg-gray-200">
-                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                        Aanvraag titel één
-                                    </th>
-                                    <td class="px-6 py-4">
-                                        02-03-2024
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Zwolle
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        14:00 - 18:00
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        4 / <strong>6</strong>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <a :href="route('lotus-requests.viewlotusrequest')" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out">
-                                            <i class="fa-solid fa-arrow-right"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr class="odd:bg-lime even:bg-lime-100  border-b hover:bg-gray-200">
-                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                        Aanvraag titel twee
-                                    </th>
-                                    <td class="px-6 py-4">
-                                        12-05-2024
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Staphorst
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        18:00 - 22:00
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        1 / <strong>6</strong>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <a :href="route('lotus-requests.viewlotusrequest')" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out"><i class="fa-solid fa-arrow-right"></i></a>
-                                    </td>
-                                </tr>
-                                <tr class="odd:bg-lime even:bg-lime-100  border-b hover:bg-gray-200">
-                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                        Aanvraag titel drie
-                                    </th>
-                                    <td class="px-6 py-4">
-                                        23-05-2024
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Zwolle
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        14:00 - 20:00
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        1 / <strong>2</strong>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <a :href="route('lotus-requests.viewlotusrequest')" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out"><i class="fa-solid fa-arrow-right"></i></a>
-                                    </td>
-                                </tr>
-                                <tr class="odd:bg-lime even:bg-lime-100  border-b hover:bg-gray-200">
-                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                        Aanvraag titel vier
-                                    </th>
-                                    <td class="px-6 py-4">
-                                        07-06-2024
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Zwolle
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        14:00 - 18:00
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        4 / <strong>6</strong>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <a :href="route('lotus-requests.viewlotusrequest')" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out"><i class="fa-solid fa-arrow-right"></i></a>
-                                    </td>
-                                </tr>
-
-
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                </div>
+                <UserLotusRequestsTable :activeUserLotusRequests="props.activeUserLotusRequests" tableTitle="Mijn aangemelde aanvragen" />
             </div>
         </div>
 
         <div class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
-                <div class="bg-white overflow-scroll shadow-sm rounded-md sm:rounded-lg border border-gray-200">
-                    <div class="p-6">
-                        <h2 class="mb-2 text-md uppercase font-semibold">Open aanvragen</h2>
-                        <hr class="mb-4">
-                        <div class="relative overflow-x-auto">
-                            <table class="w-full text-sm text-left rtl:text-right  text-gray-500 ">
-                                <thead class=" text-gray-700 uppercase text-sm bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3">
-                                            Aanvraag
-                                        </th>
-                                        <th scope="col" class="px-6 py-3">
-                                            Datum
-                                        </th>
-                                        <th scope="col" class="px-6 py-3">
-                                            Plaats
-                                        </th>
-                                        <th scope="col" class="px-6 py-3">
-                                            Tijd
-                                        </th>
-                                        <th scope="col" class="px-6 py-3">
-                                            Plekken
-                                        </th>
-                                        <th scope="col" class="px-6 py-3">
-                                            Bekijken
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="odd:bg-white even:bg-gray-50  border-b hover:bg-gray-200">
-                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                            Aanvraag titel één
-                                        </th>
-                                        <td class="px-6 py-4">
-                                            02-03-2024
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            Zwolle
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            14:00 - 18:00
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            4 / <strong>6</strong>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <a :href="route('lotus-requests.viewlotusrequest')" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out"><i class="fa-solid fa-arrow-right"></i></a>
-                                        </td>
-                                    </tr>
-                                    <tr class="odd:bg-white even:bg-gray-50  border-b hover:bg-gray-200">
-                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                            Aanvraag titel twee
-                                        </th>
-                                        <td class="px-6 py-4">
-                                            12-05-2024
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            Staphorst
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            18:00 - 22:00
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            1 / <strong>6</strong>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <a :href="route('lotus-requests.viewlotusrequest')" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out"><i class="fa-solid fa-arrow-right"></i></a>
-                                        </td>
-                                    </tr>
-                                    <tr class="odd:bg-white even:bg-gray-50  border-b hover:bg-gray-200">
-                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                            Aanvraag titel drie
-                                        </th>
-                                        <td class="px-6 py-4">
-                                            23-05-2024
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            Zwolle
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            14:00 - 20:00
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            1 / <strong>2</strong>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <a :href="route('lotus-requests.viewlotusrequest')" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out"><i class="fa-solid fa-arrow-right"></i></a>
-                                        </td>
-                                    </tr>
-                                    <tr class="odd:bg-white even:bg-gray-50  border-b hover:bg-gray-200">
-                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                            Aanvraag titel vier
-                                        </th>
-                                        <td class="px-6 py-4">
-                                            07-06-2024
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            Zwolle
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            14:00 - 18:00
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            4 / <strong>6</strong>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <a :href="route('lotus-requests.viewlotusrequest')" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out"><i class="fa-solid fa-arrow-right"></i></a>
-                                        </td>
-                                    </tr>
-
-
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                </div>
+                <LotusRequestsTable :lotusRequests="props.lotusRequests" tableTitle="Beschikbare aanvragen" />
             </div>
         </div>
 

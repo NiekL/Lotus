@@ -12,20 +12,22 @@ class LotusRequest extends Model
     protected $fillable = [
         'name',
         'description',
-        'start_date_time',
-        'end_date_time',
-        'applicant',
-        'location',
+        'date',
+        'arrival_time',
+        'end_time',
+        'amount_lotus',
+        'payment_mark',
+        'rate_group',
+        'details',
+        'city',
         'street_name',
         'house_number',
-        'postal_code',
-        'number_of_people',
-        'rate_group',
-        'special_requests',
+        'zipcode',
         'contact_person',
         'contact_phone',
         'contact_email',
-        'payment_reference',
+        'filled_spots',
+        'status'
     ];
 
     // Optionally, you can also specify which attributes should be hidden from JSON responses

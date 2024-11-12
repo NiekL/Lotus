@@ -66,7 +66,7 @@ const sortData = (key) => {
     </template>
 
     <div class="py-8">
-      <div class="mx-auto sm:px-6 lg:px-8">
+      <div class="mx-auto px-2 sm:px-6 lg:px-8">
         <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
           <h2 class="mb-2 text-md font-semibold uppercase">Klanten administratie</h2>
           <hr class="mb-4">
@@ -75,35 +75,35 @@ const sortData = (key) => {
             <table class="w-full text-sm text-left text-gray-500">
               <thead class="text-gray-700 uppercase text-sm bg-gray-50">
               <tr>
-                <th scope="col" class="px-6 py-3 sort-button" @click="sortData('name')">
+                <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4 sort-button" @click="sortData('name')">
                   Naam
                   <span v-if="sortKey === 'name'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
                 </th>
-                <th scope="col" class="px-6 py-3 sort-button" @click="sortData('place')">
+                <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4 sort-button" @click="sortData('place')">
                   Plaats
                   <span v-if="sortKey === 'place'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
                 </th>
-                <th scope="col" class="px-6 py-3 sort-button" @click="sortData('memberSince')">
+                <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4 sort-button" @click="sortData('memberSince')">
                   Lid sinds
                   <span v-if="sortKey === 'memberSince'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                   Bekijken
                 </th>
               </tr>
               </thead>
               <tbody>
               <tr v-for="(member, index) in members" :key="index" class="odd:bg-white even:bg-gray-50 border-b hover:bg-gray-200">
-                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4 font-medium text-gray-900 whitespace-nowrap">
                   {{ member.name }}
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                   {{ member.place }}
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                   {{ member.memberSince }}
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                   <a :href="route('users.viewcustomer')" class="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 ease-in-out">
                     <i class="fa-solid fa-arrow-right"></i>
                   </a>
@@ -117,7 +117,7 @@ const sortData = (key) => {
     </div>
 
       <div class="pb-8">
-          <div class="mx-auto sm:px-6 lg:px-8">
+          <div class="mx-auto px-2 sm:px-6 lg:px-8">
               <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                   <h2 class="mb-2 text-md font-semibold uppercase">Nieuwe klant aanmaken</h2>
                   <hr class="mb-4">
