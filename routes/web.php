@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 Route::get('/', function () {
 //    return Inertia::render('Welcome', [
@@ -43,8 +44,9 @@ Route::resource('announcements', AnnouncementsController::class)
 
 //Lotusaanvraag aanmaken
 Route::get('/lotus-requests/create', function () {
-    return Inertia::render('LotusRequests/Create');
-})->middleware(['auth', 'verified'])->name('lotus-requests.create');
+    return Inertia::render('LotusRequests/Create');})
+    ->middleware(['auth', 'verified', 'role:admin|coordinator|klant'])
+    ->name('lotus-requests.create');
 
 Route::post('/lotus-requests', [LotusRequestController::class, 'store'])->name('lotus-requests.store');
 
@@ -57,7 +59,7 @@ Route::get('/lotus-requests/mylotusrequests', [LotusRequestController::class, 's
 
 //Bekijk open aanvragen
 Route::get('/lotus-requests/openlotusrequests', [LotusRequestController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'role:admin|coordinator|lid|penningmeester|secretaris'])
     ->name('lotus-requests.openlotusrequests');
 
 
@@ -68,7 +70,7 @@ Route::get('/lotus-requests/viewlotusrequest', [LotusRequestController::class, '
 
 //Aanvragen accepteren of afwijzen overzicht
 Route::get('/lotus-requests/acceptlotusrequests', [LotusRequestController::class, 'showAcceptLotusRequests'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified','role:admin|coordinator'])
     ->name('lotus-requests.acceptlotusrequests');
 
 //Lotus aanvragen daadwerkelijk accepteren of afwijzen
@@ -97,7 +99,7 @@ Route::post('/lotus-requests/{id}/submit-details', [LotusRequestController::clas
 //Leden administratie
 //Krijg alle gebruikers
 Route::get('/users/memberadministration', [UserController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'role:admin|coordinator|lid|penningmeester|secretaris'])
     ->name('users.memberadministration');
 
 //Leden administratie
@@ -117,7 +119,10 @@ Route::get('/users/viewcustomer', function () {
 
 //Gebruiker toevoegen
 Route::get('/users/adduser', function () {
-    return Inertia::render('Users/AddUser');
+    $roles = Role::all();
+    return Inertia::render('Users/AddUser', [
+        'roles' => $roles,  // Pass roles to the view
+    ]);
 })->middleware(['auth', 'verified'])->name('users.adduser');
 
 //Declaratie info
@@ -135,7 +140,7 @@ Route::post('/profile/billing-info', [ProfileController::class, 'saveBillingInfo
     ->name('profile.billing-info.save');
 
 //Nieuwe gebruiker toevoegen wanner ingelogd
-Route::post('/users', [RegisteredUserController::class, 'storeNewMember'])
+Route::post('/users/adduser', [RegisteredUserController::class, 'storeNewMember'])
     ->middleware(['auth', 'verified'])
     ->name('users.store');
 

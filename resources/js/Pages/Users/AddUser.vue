@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import {ref, onMounted, defineProps} from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -12,13 +12,14 @@ const form = useForm({
     email: '',
     password: '',
     password_confirmation: '',
+    role: '',
 });
 
 const submit = () => {
     form.post(route('users.store'), {
         onFinish: () =>
         {
-            form.reset('password', 'password_confirmation');
+            form.reset('name', 'email', 'password', 'password_confirmation');
         }
     });
 };
@@ -31,15 +32,15 @@ const submit = () => {
         </template>
 
         <!-- Succesmelding -->
-<!--        <div v-if="flashMessage" class="py-8">-->
-<!--            <div class="mx-auto px-2 sm:px-6 lg:px-8">-->
-<!--                <div class="bg-green-50 overflow-scroll shadow-sm rounded-md sm:rounded-lg border border-green-500">-->
-<!--                    <div class="p-4 rounded">-->
-<!--                        {{ flashMessage }}-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
+        <div v-if="$page.props.flash.success" class="pt-8">
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
+                <div class="bg-green-50 overflow-scroll shadow-sm rounded-md sm:rounded-lg border border-green-500">
+                    <div class="p-4 rounded">
+                        {{ $page.props.flash.success }}
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <form @submit.prevent="submit">
 <!--        <div :class="flashMessage ? 'pb-8' : 'py-8'">-->
@@ -111,6 +112,18 @@ const submit = () => {
                             />
 
                             <InputError class="mt-2" :message="form.errors.password_confirmation" />
+                        </div>
+
+                        <!-- Role selection -->
+                        <div>
+                            <InputLabel for="role" value="Rol" />
+                            <select v-model="form.role" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <option value="" disabled selected>Selecteer een rol</option>
+                                <option v-for="role in $page.props.roles" :key="role.id" :value="role.id">
+                                    {{ role.name }}
+                                </option>
+                            </select>
+                            <InputError :message="form.errors.role" />
                         </div>
 
                         <div>

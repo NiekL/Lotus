@@ -3,6 +3,8 @@ namespace App\Http\Controllers;
 
 use App\Models\LotusRequest;
 use App\Models\Announcements;
+use App\Models\User;
+use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -10,6 +12,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+
         // Haal de lotusRequests op (je kunt hier filteren of sorteren indien nodig)
         $announcements = Announcements::all();
         $lotusRequests = LotusRequest::where('status', 2)
@@ -27,8 +30,11 @@ class DashboardController extends Controller
             ->get();
 
 
+
+
         // Geef de lotusRequests door aan de view
         return Inertia::render('Dashboard', [
+            'userRoles' => auth()->user()->roles->pluck('name')->toArray(),
             'announcements' => $announcements,
             'lotusRequests' => $lotusRequests,
             'activeUserLotusRequests' => $activeUserLotusRequests,

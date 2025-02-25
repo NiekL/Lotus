@@ -5,15 +5,18 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputError from '@/Components/InputError.vue';
 import LotusRequestsTable from "@/Components/LotusRequestsTable.vue";
 import UserLotusRequestsTable from "@/Components/UserLotusRequestsTable.vue";
-import {defineProps} from "vue";
+import {computed, defineProps} from "vue";
 import InputLabel from "@/Components/InputLabel.vue";
 const props = defineProps({
     lotusRequests: Array,
     activeUserLotusRequests: Array,
     announcements: Array,
+    userRoles: Array,
+
 });
 
 console.log(props);
+
 
 //Announcement form
 const form = useForm({
@@ -31,7 +34,7 @@ const deleteAnnouncement = (id) => {
 <template>
     <Head title="Dashboard" />
 
-    <AuthenticatedLayout>
+    <AuthenticatedLayout :userRoles="userRoles">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
         </template>
@@ -53,14 +56,14 @@ const deleteAnnouncement = (id) => {
                                     <i class="fa-regular fa-bell mt-1"></i> <!-- mt-1 helpt bij het beter uitlijnen van de bel met de bovenste regel van de tekst -->
                                     <span class="mx-3">{{ announcement.announcement }}</span>
                                 </p>
-                                <i class="fa-regular fa-trash-can cursor-pointer mt-1 text-red-600" @click="deleteAnnouncement(announcement.id)"></i>
+                                <i v-if="userRoles.includes('admin') || userRoles.includes('coordinator')" class="fa-regular fa-trash-can cursor-pointer mt-1 text-red-600" @click="deleteAnnouncement(announcement.id)"></i>
                             </div>
                             <hr class="mb-2">
                         </div>
 
                     </div>
 
-                    <form @submit.prevent="form.post(route('announcements.store'), { onSuccess: () => form.reset() })">
+                    <form v-if="userRoles.includes('admin') || userRoles.includes('coordinator')" @submit.prevent="form.post(route('announcements.store'), { onSuccess: () => form.reset() })">
                         <textarea
                             v-model="form.message"
                             placeholder="Voeg een mededeling toe"
@@ -74,13 +77,13 @@ const deleteAnnouncement = (id) => {
             </div>
         </div>
 
-        <div class="pb-8">
+        <div v-if="['admin', 'coordinator', 'lid', 'penningmeester', 'secretaris'].some(role => userRoles.includes(role))" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <UserLotusRequestsTable :activeUserLotusRequests="props.activeUserLotusRequests" tableTitle="Mijn aangemelde aanvragen" />
             </div>
         </div>
 
-        <div class="pb-8">
+        <div v-if="['admin', 'coordinator', 'lid', 'penningmeester', 'secretaris'].some(role => userRoles.includes(role))" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <LotusRequestsTable :lotusRequests="props.lotusRequests" tableTitle="Beschikbare aanvragen" />
             </div>
@@ -89,12 +92,3 @@ const deleteAnnouncement = (id) => {
 
     </AuthenticatedLayout>
 </template>
-
-
-<script>
-export default {
-    props: {
-        lotusRequests: Array,
-    },
-};
-</script>

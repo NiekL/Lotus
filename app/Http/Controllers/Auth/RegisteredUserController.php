@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Permission\Models\Role;
 
 class RegisteredUserController extends Controller
 {
@@ -42,6 +43,9 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $role = Role::findById(3);  // Maak klant wanneer niet ingelogd en registreerd
+        $user->assignRole($role);  // Assign the role to the user
+
         event(new Registered($user));
 
         Auth::login($user);
@@ -49,29 +53,38 @@ class RegisteredUserController extends Controller
         return redirect(route('dashboard', absolute: false));
     }
 
+    /**
+     * Store a new user and assign a role.
+     */
     public function storeNewMember(Request $request): RedirectResponse
     {
+
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => 'required|exists:roles,id',  // Validate that the role exists
         ]);
 
 
-
+        // Create the new user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
+        // Trigger the Registered event
         event(new Registered($user));
 
-        // Optioneel: Trigger event of doe additionele acties
+        // Assign the selected role to the newly created user
+        $roleId = $request->role ?: 4;  // If no role is provided, use role ID 3
+        $role = Role::findById($roleId);  // Fetch the role by its ID
+        $user->assignRole($role);  // Assign the role to the user
 
-//        return redirect(route('dashboard'));
+        // Optionally: Trigger additional actions or events
         return redirect()->back()->with('success', 'Gebruiker succesvol aangemaakt.');
-
     }
-
 }
+

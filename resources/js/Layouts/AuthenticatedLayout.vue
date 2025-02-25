@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import {defineProps, ref, watch} from "vue";
 import "https://kit.fontawesome.com/bf86a3d082.js";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import Dropdown from "@/Components/Dropdown.vue";
@@ -9,13 +9,28 @@ import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import { Link } from "@inertiajs/vue3";
 
 const showingNavigationDropdown = ref(false);
+
+const props = defineProps({
+    userRoles: {
+        type: Array,
+        default: () => []
+    }
+});
+
+// Watch for changes in userRoles and log a message if it's empty
+watch(() => props.userRoles, (newVal) => {
+    if (!newVal || newVal.length === 0) {
+        console.log("userRoles is empty or not provided");
+    }
+}, { immediate: true }); // Runs immediately when the component is mounted
+
 </script>
 
 <template>
     <div>
         <div class="min-h-screen bg-gray-100" id="top-of-app">
             <nav
-                class="bg-red-50 border-b border-gray-200 fixed z-30 w-full border-b border-gray-200"
+                class="bg-white border-b border-gray-200 fixed z-30 w-full border-b border-gray-200"
             >
                 <div class="mx-auto px-4 lg:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
@@ -116,10 +131,12 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                         <i class="fa-solid fa-table"></i>Overzicht
+                            {{ $page.props.auth.user.userRoles }}
                         </NavLink>
                         <hr>
 
                         <NavLink
+                            v-if="['admin', 'coordinator', 'klant'].some(role => userRoles.includes(role))"
                             :href="route('lotus-requests.create')"
                             :active="route().current('lotus-requests.create')"
                         >
@@ -127,6 +144,7 @@ const showingNavigationDropdown = ref(false);
                         </NavLink>
 
                         <NavLink
+                            v-if="['admin', 'coordinator', 'lid', 'penningmeester', 'secretaris'].some(role => props.userRoles.includes(role))"
                             :href="route('lotus-requests.mylotusrequests')"
                             :active="route().current('lotus-requests.mylotusrequests')"
                         >
@@ -134,6 +152,7 @@ const showingNavigationDropdown = ref(false);
                         </NavLink>
 
                         <NavLink
+                            v-if="['admin', 'coordinator', 'lid', 'penningmeester', 'secretaris'].some(role => props.userRoles.includes(role))"
                             :href="route('lotus-requests.openlotusrequests')"
                             :active="route().current('lotus-requests.openlotusrequests')"
                         >
@@ -141,6 +160,7 @@ const showingNavigationDropdown = ref(false);
                         </NavLink>
 
                         <NavLink
+                            v-if="['admin', 'coordinator'].some(role => props.userRoles.includes(role))"
                             :href="route('lotus-requests.acceptlotusrequests')"
                             :active="route().current('lotus-requests.acceptlotusrequests')"
                         >

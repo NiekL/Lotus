@@ -165,7 +165,7 @@ const handleSubmit = async () => {
                     <p v-if="isUserSignedUp" class="mb-4">Je bent momenteel <strong>aangemeld</strong> voor deze aanvraag.</p>
                     <p v-else class="mb-4">Je bent momenteel <strong>niet aangemeld</strong> voor deze aanvraag.</p>
 
-                    <p v-if="!canSignup" class="mb-4">Deze aanvraag zit momenteel vol. Het is dus niet meer mogelijk om je hiervoor aan te melden.</p>
+                    <p v-if="!canSignup" class="mb-4">Deze aanvraag zit momenteel vol. Het is dus niet meer mogelijk om je hiervoor aan te melden. Neem bij vragen hierover even contact op met een coördinator.</p>
 
                     <!-- Knoppen voor aanmelden/afmelden -->
                     <button v-if="!isUserSignedUp && canSignup" @click="signup" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 mr-4">
@@ -213,7 +213,7 @@ const handleSubmit = async () => {
                     <hr class="mb-4">
                     <!-- Naam aanvraag -->
                     <div class="mb-4">
-                        <InputLabel for="name" value="Naam aanvraag" />
+                        <InputLabel for="name" value="Naam bedrijf/organisatie" />
                         <p class="border p-2 rounded">
                             {{ lotusRequest.name }}
                         </p>

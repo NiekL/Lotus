@@ -50,6 +50,12 @@ const today = computed(() => {
     return now.toISOString().split('T')[0]; // zet datum om naar YYYY-MM-DD formaat
 });
 
+// Generate a random payment mark
+const generatePaymentMark = () => {
+    return Math.floor(10000 + Math.random() * 90000).toString(); // 5-cijferig random getal
+};
+form.payment_mark = generatePaymentMark();
+
 </script>
 
 <template>
@@ -68,7 +74,7 @@ const today = computed(() => {
                             <h2 class="mb-1 text-sm font-semibold uppercase">Algemene gegevens aanvraag</h2>
                             <hr class="mb-2">
                             <div>
-                                <InputLabel for="name" value="Naam aanvraag" />
+                                <InputLabel for="name" value="Naam bedrijf/organisatie" />
                                 <TextInput
                                     id="name"
                                     type="text"
@@ -136,7 +142,7 @@ const today = computed(() => {
                                 />
                                 </div>
                                 <div class="w-full lg:w-1/2 inline-block">
-                                    <InputLabel for="payment_mark" value="Betalingskenmerk" />
+                                    <InputLabel for="payment_mark" value="Betalingskenmerk (Met echte database goed gegenereerd)" />
                                     <TextInput
                                         id="payment_mark"
                                         type="text"
@@ -148,7 +154,7 @@ const today = computed(() => {
                             </div>
 
                             <div>
-                                <InputLabel for="rate_group" value="Tariefgroep" />
+                                <InputLabel for="rate_group" value="Tariefgroep (Selecteerveld en voor iedereen?)" />
                                 <TextInput
                                     id="rate_group"
                                     type="text"
@@ -176,7 +182,7 @@ const today = computed(() => {
                             <hr class="mb-2">
 
                                 <div>
-                                    <InputLabel for="city" value="Plaats" />
+                                    <InputLabel for="city" value="Plaats speellocatie" />
                                     <TextInput
                                         id="city"
                                         type="text"
@@ -188,7 +194,7 @@ const today = computed(() => {
 
                             <div class="flex gap-6 flex-wrap lg:flex-nowrap">
                                  <div class="w-full lg:w-1/3 inline-block">
-                                    <InputLabel for="street_name" value="Straatnaam" />
+                                    <InputLabel for="street_name" value="Straatnaam speellocatie" />
                                     <TextInput
                                         id="street_name"
                                         type="text"
@@ -199,7 +205,7 @@ const today = computed(() => {
                                 </div>
 
                                 <div class="w-full lg:w-1/3 inline-block">
-                                    <InputLabel for="house_number" value="Huisnummer" />
+                                    <InputLabel for="house_number" value="Huisnummer speellocatie" />
                                     <TextInput
                                         id="house_number"
                                         type="text"
@@ -210,7 +216,7 @@ const today = computed(() => {
                                 </div>
 
                                 <div class="w-full lg:w-1/3 inline-block">
-                                    <InputLabel for="zipcode" value="Postcode" />
+                                    <InputLabel for="zipcode" value="Postcode speellocatie" />
                                     <TextInput
                                         id="zipcode"
                                         type="text"
