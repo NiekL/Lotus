@@ -45,7 +45,7 @@ Route::resource('announcements', AnnouncementsController::class)
 //Lotusaanvraag aanmaken
 Route::get('/lotus-requests/create', function () {
     return Inertia::render('LotusRequests/Create');})
-    ->middleware(['auth', 'verified', 'role:admin|coordinator|klant'])
+    ->middleware(['auth', 'verified', 'role:admin|klant|coordinator'])
     ->name('lotus-requests.create');
 
 Route::post('/lotus-requests', [LotusRequestController::class, 'store'])->name('lotus-requests.store');
@@ -53,8 +53,13 @@ Route::post('/lotus-requests', [LotusRequestController::class, 'store'])->name('
 
 //Mijn lotus aanvragen
 Route::get('/lotus-requests/mylotusrequests', [LotusRequestController::class, 'showUserRequests'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified','role:admin|coordinator|lid|penningmeester|secretaris'])
     ->name('lotus-requests.mylotusrequests');
+
+//Mijn klant aanvragen inzien
+Route::get('/lotus-requests/mycustomerlotusrequests', [LotusRequestController::class, 'showCustomerRequests'])
+    ->middleware(['auth', 'verified','role:admin|klant'])
+    ->name('lotus-requests.mycustomerlotusrequests');
 
 
 //Bekijk open aanvragen
@@ -64,13 +69,14 @@ Route::get('/lotus-requests/openlotusrequests', [LotusRequestController::class, 
 
 
 //Aanvragen single
+//@TODO: Roles?
 Route::get('/lotus-requests/viewlotusrequest', [LotusRequestController::class, 'show'])
     ->middleware(['auth', 'verified'])
     ->name('lotus-requests.viewlotusrequest');
 
 //Aanvragen accepteren of afwijzen overzicht
 Route::get('/lotus-requests/acceptlotusrequests', [LotusRequestController::class, 'showAcceptLotusRequests'])
-    ->middleware(['auth', 'verified','role:admin|coordinator'])
+    ->middleware(['auth', 'verified','role:admin|coordinator|klant'])
     ->name('lotus-requests.acceptlotusrequests');
 
 //Lotus aanvragen daadwerkelijk accepteren of afwijzen
@@ -103,9 +109,14 @@ Route::get('/users/memberadministration', [UserController::class, 'index'])
     ->name('users.memberadministration');
 
 //Leden administratie
-Route::get('/users/customeradministration', function () {
-    return Inertia::render('Users/CustomerAdministration');
-})->middleware(['auth', 'verified'])->name('users.customeradministration');
+Route::get('/users/customeradministration', [UserController::class, 'customers'])
+    ->middleware(['auth', 'verified', 'role:admin|coordinator|penningmeester|secretaris'])
+    ->name('users.customeradministration');
+
+//Voor de lotus aanvraag om alleen de klanten in te zien om een aanvraag aan een klant te koppelen
+Route::get('/users/customersOnly', [UserController::class, 'getCustomersOnly'])
+    ->middleware(['auth', 'verified', 'role:admin|coordinator'])
+    ->name('users.customersOnly');
 
 //Bekijk lid
 Route::get('/users/viewmember/{id}', [UserController::class, 'show'])
@@ -123,7 +134,7 @@ Route::get('/users/adduser', function () {
     return Inertia::render('Users/AddUser', [
         'roles' => $roles,  // Pass roles to the view
     ]);
-})->middleware(['auth', 'verified'])->name('users.adduser');
+})->middleware(['auth', 'verified', 'role:admin|coordinator|secretaris'])->name('users.adduser');
 
 //Declaratie info
 Route::get('/declarationinfo', function () {
@@ -132,7 +143,7 @@ Route::get('/declarationinfo', function () {
 
 //Factuurgegevens
 Route::get('/profile/invoiceinfo', [ProfileController::class, 'invoiceInfo'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified','role:admin|coordinator|klant|penningmeester|secretaris'])
     ->name('profile.invoiceinfo');
 
 //Factuurgegevens opslaan

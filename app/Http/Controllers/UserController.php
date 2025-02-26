@@ -8,7 +8,9 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::all()->map(function ($user) {
+        $users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('role_id', 3);
+        })->get()->map(function($user) {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -19,6 +21,34 @@ class UserController extends Controller
         return Inertia::render('Users/MemberAdministration', [
             'members' => $users
         ]);
+    }
+
+    public function customers()
+    {
+
+        $customers = User::whereHas('roles', function ($query) {
+            $query->where('role_id', 3);
+        })->get()->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ];
+        })->sortBy('name');
+
+        return Inertia::render('Users/CustomerAdministration', [
+            'customers' => $customers
+        ]);
+    }
+
+    public function getCustomersOnly()
+    {
+
+        $customers = User::whereHas('roles', function ($query) {
+            $query->where('role_id', 3);
+        })->get(['id', 'name', 'email'])->sortBy('name');
+
+        return response()->json(['customers' => $customers]);
     }
 
     public function show($id)

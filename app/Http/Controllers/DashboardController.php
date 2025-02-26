@@ -29,15 +29,26 @@ class DashboardController extends Controller
             ->orderBy('date', 'asc') // Sorteert oplopend op datum
             ->get();
 
+        $pendingCustomerLotusRequests = LotusRequest::where('customer_id', $user->id)
+            ->where('status', 1) // Status 0 = in afwachting
+            ->whereDate('date', '>=', $today)
+            ->orderBy('date', 'asc')
+            ->get();
 
-
+        $activeCustomerLotusRequests = LotusRequest::where('customer_id', $user->id)
+            ->where('status', 2) // Status 1 = geaccepteerd / lopend
+            ->whereDate('date', '>=', $today)
+            ->orderBy('date', 'asc')
+            ->get();
 
         // Geef de lotusRequests door aan de view
         return Inertia::render('Dashboard', [
-            'userRoles' => auth()->user()->roles->pluck('name')->toArray(),
+//            'userRoles' => auth()->user()->roles->pluck('name')->toArray(),
             'announcements' => $announcements,
             'lotusRequests' => $lotusRequests,
             'activeUserLotusRequests' => $activeUserLotusRequests,
+            'pendingCustomerLotusRequests' => $pendingCustomerLotusRequests,
+            'activeCustomerLotusRequests' => $activeCustomerLotusRequests,
             'success' => session('success'), // als je een succesbericht wilt doorgeven
         ]);
     }

@@ -1,28 +1,26 @@
 <script setup>
-import {defineProps, ref, watch} from "vue";
+import {defineProps, ref, computed} from "vue";
 import "https://kit.fontawesome.com/bf86a3d082.js";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
 import NavLink from "@/Components/NavLink.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
-import { Link } from "@inertiajs/vue3";
+import { usePage, Link } from "@inertiajs/vue3";
 
 const showingNavigationDropdown = ref(false);
 
-const props = defineProps({
-    userRoles: {
-        type: Array,
-        default: () => []
-    }
-});
+//User Roles
+const page = usePage();
+const userRoles = computed(() => page.props.auth.user?.roles || []);
 
-// Watch for changes in userRoles and log a message if it's empty
-watch(() => props.userRoles, (newVal) => {
-    if (!newVal || newVal.length === 0) {
-        console.log("userRoles is empty or not provided");
-    }
-}, { immediate: true }); // Runs immediately when the component is mounted
+const isAdmin = computed(() => userRoles.value.includes("admin"));
+const isCoordinator = computed(() => userRoles.value.includes("coordinator"));
+const isKlant = computed(() => userRoles.value.includes("klant"));
+const isLid = computed(() => userRoles.value.includes("lid"));
+const isPenningmeester = computed(() => userRoles.value.includes("penningmeester"));
+const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
+
 
 </script>
 
@@ -131,12 +129,12 @@ watch(() => props.userRoles, (newVal) => {
                             :active="route().current('dashboard')"
                         >
                         <i class="fa-solid fa-table"></i>Overzicht
-                            {{ $page.props.auth.user.userRoles }}
                         </NavLink>
                         <hr>
 
+                        <!-- MAKE THIS ACCESSIBLE FOR 'admin', 'coordinator', 'klant' -->
                         <NavLink
-                            v-if="['admin', 'coordinator', 'klant'].some(role => userRoles.includes(role))"
+                            v-if="isAdmin || isCoordinator || isKlant"
                             :href="route('lotus-requests.create')"
                             :active="route().current('lotus-requests.create')"
                         >
@@ -144,7 +142,7 @@ watch(() => props.userRoles, (newVal) => {
                         </NavLink>
 
                         <NavLink
-                            v-if="['admin', 'coordinator', 'lid', 'penningmeester', 'secretaris'].some(role => props.userRoles.includes(role))"
+                            v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris"
                             :href="route('lotus-requests.mylotusrequests')"
                             :active="route().current('lotus-requests.mylotusrequests')"
                         >
@@ -152,7 +150,15 @@ watch(() => props.userRoles, (newVal) => {
                         </NavLink>
 
                         <NavLink
-                            v-if="['admin', 'coordinator', 'lid', 'penningmeester', 'secretaris'].some(role => props.userRoles.includes(role))"
+                            v-if="isAdmin || isKlant"
+                            :href="route('lotus-requests.mycustomerlotusrequests')"
+                            :active="route().current('lotus-requests.mycustomerlotusrequests')"
+                        >
+                            <i class="fa-regular fa-calendar-check"></i>Aanvragen inzien<span v-if="isAdmin">(Alleen klanten)</span>
+                        </NavLink>
+
+                        <NavLink
+                            v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris"
                             :href="route('lotus-requests.openlotusrequests')"
                             :active="route().current('lotus-requests.openlotusrequests')"
                         >
@@ -160,16 +166,17 @@ watch(() => props.userRoles, (newVal) => {
                         </NavLink>
 
                         <NavLink
-                            v-if="['admin', 'coordinator'].some(role => props.userRoles.includes(role))"
+                            v-if="isAdmin || isCoordinator"
                             :href="route('lotus-requests.acceptlotusrequests')"
                             :active="route().current('lotus-requests.acceptlotusrequests')"
                         >
                             <i class="fa-solid fa-square-check"></i>Aanvragen goedkeuren
                         </NavLink>
 
-                        <hr>
+                        <hr v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris">
 
                         <NavLink
+                            v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris"
                             :href="route('users.memberadministration')"
                             :active="route().current('users.memberadministration')"
                         >
@@ -177,15 +184,17 @@ watch(() => props.userRoles, (newVal) => {
                         </NavLink>
 
                         <NavLink
+                            v-if="isAdmin || isCoordinator || isPenningmeester || isSecretaris"
                             :href="route('users.customeradministration')"
                             :active="route().current('users.customeradministration')"
                         >
                             <i class="fa-solid fa-user-tie"></i>Klanten administratie
                         </NavLink>
 
-                        <hr>
+                        <hr v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris">
 
                         <NavLink
+                            v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris"
                             :href="route('declarationinfo')"
                             :active="route().current('declarationinfo')"
                         >
@@ -195,6 +204,7 @@ watch(() => props.userRoles, (newVal) => {
                         <hr>
 
                         <NavLink
+                            v-if="isAdmin || isCoordinator || isKlant || isPenningmeester"
                             :href="route('profile.invoiceinfo')"
                             :active="route().current('profile.invoiceinfo')"
                         >

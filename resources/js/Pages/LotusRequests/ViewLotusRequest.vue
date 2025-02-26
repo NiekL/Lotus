@@ -3,7 +3,7 @@
 import {onMounted, ref, computed} from 'vue';
 import axios from 'axios';
 import { defineProps } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import InputLabel from "@/Components/InputLabel.vue";
 import TextAreaInput from "@/Components/TextAreaInput.vue";
@@ -134,6 +134,18 @@ const handleSubmit = async () => {
     }, 100);
 };
 
+//User Roles
+const page = usePage();
+const userRoles = computed(() => page.props.auth.user?.roles || []);
+
+const isAdmin = computed(() => userRoles.value.includes("admin"));
+const isCoordinator = computed(() => userRoles.value.includes("coordinator"));
+const isKlant = computed(() => userRoles.value.includes("klant"));
+const isLid = computed(() => userRoles.value.includes("lid"));
+const isPenningmeester = computed(() => userRoles.value.includes("penningmeester"));
+const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
+
+
 </script>
 
 <template>
@@ -155,7 +167,7 @@ const handleSubmit = async () => {
             </div>
         </div>
 
-        <div class="py-8">
+        <div v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris" class="py-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md uppercase font-semibold">Aanmeldstatus</h2>
@@ -178,7 +190,7 @@ const handleSubmit = async () => {
             </div>
         </div>
 
-        <div class="pb-8">
+        <div v-if="isAdmin || isCoordinator || isSecretaris" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md uppercase font-semibold">Aanvraag goedkeuren/afwijzen</h2>
@@ -206,7 +218,7 @@ const handleSubmit = async () => {
         </div>
 
 
-        <div class="pb-8">
+        <div class="pb-8" :class="{ 'pt-8': isKlant }">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md uppercase font-semibold">Gegevens aanvraag</h2>
@@ -359,9 +371,9 @@ const handleSubmit = async () => {
 
                                 <!-- Display Pivot Data if available -->
                                 <div v-if="user.pivot" class="text-gray-600 text-sm mt-2 space-y-1">
-                                    <p><strong>Gespeelde tijd:</strong> {{ user.pivot.user_played_time ?? 'Geen gegevens' }} minuten</p>
-                                    <p><strong>Gereden kilometers:</strong> {{ user.pivot.user_amount_km ?? 'Geen gegevens' }} km</p>
-                                    <p><strong>Feedback:</strong> {{ user.pivot.user_feedback ?? 'Geen feedback' }}</p>
+                                    <p v-if="!isKlant"><strong>Gespeelde tijd:</strong> {{ user.pivot.user_played_time ?? 'Geen gegevens' }} minuten</p>
+                                    <p v-if="!isKlant"><strong>Gereden kilometers:</strong> {{ user.pivot.user_amount_km ?? 'Geen gegevens' }} km</p>
+                                    <p v-if="!isKlant"><strong>Feedback:</strong> {{ user.pivot.user_feedback ?? 'Geen feedback' }}</p>
                                 </div>
                             </div>
                         </li>
@@ -433,12 +445,11 @@ const handleSubmit = async () => {
         </div>
 
 
-        <div class="pb-8">
+        <div v-if="isAdmin || isCoordinator || isKlant || isPenningmeester || isSecretaris" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md uppercase font-semibold">Factuurgegevens</h2>
                     <hr class="mb-4">
-                    <p>Dit is niet voor alle gebruikers te zien</p>
                     <div class="space-y-6">
 
                         <!-- Factuurnummer -->

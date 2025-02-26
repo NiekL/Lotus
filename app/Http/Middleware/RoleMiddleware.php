@@ -13,11 +13,15 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!$request->user() || !$request->user()->hasRole($role)) {
+        $user = $request->user();
+
+        // Check of de gebruiker ingelogd is en minimaal één van de opgegeven rollen heeft
+        if (!$user || !$user->hasAnyRole($roles, 'web')) {
             abort(403, 'Onvoldoende rechten.');
         }
+
         return $next($request);
     }
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
@@ -8,27 +8,13 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 // Haal leden op van de server via Inertia's usePage hook
 const { members } = usePage().props;
 
-console.log(members)
+//User Roles
+const page = usePage();
+const userRoles = computed(() => page.props.auth.user?.roles || []);
 
-// Sort state
-const sortKey = ref('name');
-const sortOrder = ref('asc'); // 'asc' of 'desc'
-
-// Sorteren functie
-const sortData = (key) => {
-  if (sortKey.value === key) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortKey.value = key;
-    sortOrder.value = 'asc';
-  }
-
-  members.value.sort((a, b) => {
-    if (a[key] < b[key]) return sortOrder.value === 'asc' ? -1 : 1;
-    if (a[key] > b[key]) return sortOrder.value === 'asc' ? 1 : -1;
-    return 0;
-  });
-};
+const isAdmin = computed(() => userRoles.value.includes("admin"));
+const isCoordinator = computed(() => userRoles.value.includes("coordinator"));
+const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
 </script>
 
 
@@ -60,7 +46,6 @@ const sortData = (key) => {
                 </th>
                 <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4 sort-button" @click="sortData('name')">
                   Naam
-                  <span v-if="sortKey === 'name'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
                 </th>
                 <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                   E-mail
@@ -96,7 +81,7 @@ const sortData = (key) => {
       </div>
     </div>
 
-    <div class="pb-8">
+    <div v-if="isAdmin || isCoordinator || isSecretaris" class="pb-8">
       <div class="mx-auto px-2 sm:px-6 lg:px-8">
         <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
           <h2 class="mb-2 text-md font-semibold uppercase">Nieuw lid aanmaken</h2>

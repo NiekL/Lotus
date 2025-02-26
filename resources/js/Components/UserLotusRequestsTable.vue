@@ -25,7 +25,7 @@ const formatTime = (timeString) => {
 
             <!-- Check of userLotusRequests leeg is -->
             <div v-if="activeUserLotusRequests.length === 0" class="text-gray-600 py-4">
-                Je hebt je (nog) niet aangemeld voor een aanvraag.
+                Er zijn momenteel geen aanvragen beschikbaar.
             </div>
 
             <div v-else class="relative overflow-x-auto">

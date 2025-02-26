@@ -32,7 +32,12 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? [
+                    'id' => $request->user()->id,
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
+                    'roles' => $request->user()->roles->map(fn($role) => $role->name)->toArray(), // **Enkel rol-namen meesturen**
+                ] : null,
             ],
             'flash' => [
                 'success' => $request->session()->get('success'),

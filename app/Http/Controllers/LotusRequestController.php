@@ -15,6 +15,7 @@ class LotusRequestController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string',
+            'customer_id' => 'required|integer',
             'description' => 'nullable|string',
             'date' => 'required|date',
             'arrival_time' => 'nullable|date_format:H:i',
@@ -38,8 +39,13 @@ class LotusRequestController extends Controller
 
         // Redirect naar het overzicht van open aanvragen met een succesmelding
 //        return redirect()->route('lotus-requests.openlotusrequests')->with('success', 'Lotus-aanvraag succesvol aangemaakt.');
+        $user = auth()->user();
 
-        return redirect()->route('lotus-requests.acceptlotusrequests')->with('success', 'Lotus-aanvraag succesvol aangemaakt.');
+        if ($user->roles->contains('name', 'klant')) {
+            return redirect()->route('dashboard')->with('success', 'Lotus-aanvraag succesvol aangemaakt.');
+        } else {
+            return redirect()->route('lotus-requests.acceptlotusrequests')->with('success', 'Lotus-aanvraag succesvol aangemaakt.');
+        }
 
     }
 
@@ -61,13 +67,15 @@ class LotusRequestController extends Controller
     {
         $id = $request->query('id');
 
+
         // Retrieve the Lotus request along with signed-up users and their pivot data
         $lotusRequest = LotusRequest::with(['users' => function($query) {
             $query->withPivot('user_played_time', 'user_amount_km', 'user_feedback');
         }])->findOrFail($id);
 
         // Retrieve billing info for the logged-in user
-        $customer = User::findOrFail(1); // Find user with ID = 1
+        $customer = User::findOrFail($lotusRequest->customer_id); // Find user with ID
+
         $billingInfo = $customer->billingInfo()->firstOrCreate([], [
             'billing_name' => '',
             'billing_contactperson' => '',
@@ -77,6 +85,8 @@ class LotusRequestController extends Controller
             'billing_zipcode' => '',
             'billing_city' => ''
         ]);
+
+
 
         // Retrieve the current user's pivot data for this request, if it exists
         $user = auth()->user();
@@ -124,6 +134,44 @@ class LotusRequestController extends Controller
         return Inertia::render('LotusRequests/MyLotusRequests', [
             'activeUserLotusRequests' => $activeUserLotusRequests,
             'expiredUserLotusRequests' => $expiredUserLotusRequests,
+        ]);
+    }
+
+    public function showCustomerRequests($user_id = null)
+    {
+        // Verkrijg de huidige ingelogde gebruiker of de opgegeven gebruiker
+        $user = $user_id ? User::find($user_id) : auth()->user();
+
+        if (!$user) {
+            abort(404, 'Gebruiker niet gevonden.');
+        }
+
+        // De huidige datum ophalen
+        $today = now()->startOfDay();
+
+        // Haal de Lotus-aanvragen op die bij de gebruiker horen
+        $pendingCustomerLotusRequests = LotusRequest::where('customer_id', $user->id)
+            ->where('status', 1) // Status 0 = in afwachting
+            ->whereDate('date', '>=', $today)
+            ->orderBy('date', 'asc')
+            ->get();
+
+        $activeCustomerLotusRequests = LotusRequest::where('customer_id', $user->id)
+            ->where('status', 2) // Status 1 = geaccepteerd / lopend
+            ->whereDate('date', '>=', $today)
+            ->orderBy('date', 'asc')
+            ->get();
+
+        $expiredCustomerLotusRequests = LotusRequest::where('customer_id', $user->id)
+            ->whereDate('date', '<', $today)
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // Geef de aanvragen door aan de Inertia view
+        return Inertia::render('LotusRequests/MyCustomerRequests', [
+            'pendingUserLotusRequests' => $pendingCustomerLotusRequests,
+            'activeUserLotusRequests' => $activeCustomerLotusRequests,
+            'expiredUserLotusRequests' => $expiredCustomerLotusRequests,
         ]);
     }
 
@@ -250,10 +298,5 @@ class LotusRequestController extends Controller
         return redirect()->route('lotus-requests.viewlotusrequest', ['id' => $id])
             ->with('success', 'Gegevens succesvol doorgegeven.');
     }
-
-
-
-
-
 
 }

@@ -1,18 +1,20 @@
 
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import axios from 'axios';
 
 
 // Initialize the form using useForm from Inertia.js
 const form = useForm({
     name: '',
+    customer_id: '',
     description: '',
     date: '',
     arrival_time: '',
@@ -30,19 +32,7 @@ const form = useForm({
     contact_email: '',
 });
 
-// Method to handle form submission
-const submit = () => {
-    form.post(route('lotus-requests.store'), {
-        onFinish: () => {
-            // Reset het formulier en haal de successmelding op
-            form.reset();
-            form.success = ''; // Reset de successmelding
-        },
-        onError: (errors) => {
-            console.error(errors);
-        }
-    });
-};
+
 
 // Compute de huidige datum
 const today = computed(() => {
@@ -56,6 +46,45 @@ const generatePaymentMark = () => {
 };
 form.payment_mark = generatePaymentMark();
 
+//User Roles
+const page = usePage();
+const userRoles = computed(() => page.props.auth.user?.roles || []);
+
+const isAdmin = computed(() => userRoles.value.includes("admin"));
+const isCoordinator = computed(() => userRoles.value.includes("coordinator"));
+const isKlant = computed(() => userRoles.value.includes("klant"));
+
+// Customer selection logic
+const customers = ref([]);
+
+onMounted(async () => {
+    if (isAdmin.value || isCoordinator.value) {
+        try {
+            const response = await axios.get(route('users.customersOnly')); // Use the new route
+            customers.value = response.data.customers;
+        } catch (error) {
+            console.error("Error fetching customers:", error);
+        }
+    }
+
+    if (isKlant.value) {
+        form.customer_id = page.props.auth.user?.id; // Set customer_id for klanten automatically
+    }
+});
+
+// Method to handle form submission
+const submit = () => {
+    form.post(route('lotus-requests.store'), {
+        onFinish: () => {
+            // Reset het formulier en haal de successmelding op
+            form.reset();
+            form.success = ''; // Reset de successmelding
+        },
+        onError: (errors) => {
+            console.error(errors);
+        }
+    });
+};
 </script>
 
 <template>
@@ -86,6 +115,22 @@ form.payment_mark = generatePaymentMark();
                                 />
                                 <InputError class="mt-2" :message="form.errors.name" />
                             </div>
+
+                            <!-- CREATE AN (invisible) OPTION to set the customer_id to the current user id if the role is klant. Create an select option to select a klant when the role is 'admin'. -->
+                            <!-- Customer selection (Hidden for 'klant', Dropdown for 'admin') -->
+                            <div v-if="isAdmin">
+                                <InputLabel for="customer_id" value="Selecteer Klant" />
+                                <select id="customer_id" v-model="form.customer_id" class="block w-full border-gray-300 rounded-md shadow-sm">
+                                    <option value="" disabled>Selecteer een klant</option>
+                                    <option v-for="customer in customers" :key="customer.id" :value="customer.id">
+                                        {{ customer.name }}
+                                    </option>
+                                </select>
+                                <InputError class="mt-2" :message="form.errors.customer_id" />
+                            </div>
+
+                            <!-- Invisible field for 'klant' -->
+                            <input v-if="isKlant" type="hidden" v-model="form.customer_id" />
 
                             <div>
                                 <InputLabel for="description" value="Beschrijving" />

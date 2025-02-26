@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { useForm, Head } from '@inertiajs/vue3';
+import { useForm, Head, usePage } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputError from '@/Components/InputError.vue';
 import LotusRequestsTable from "@/Components/LotusRequestsTable.vue";
@@ -10,13 +10,11 @@ import InputLabel from "@/Components/InputLabel.vue";
 const props = defineProps({
     lotusRequests: Array,
     activeUserLotusRequests: Array,
+    pendingCustomerLotusRequests: Array,
+    activeCustomerLotusRequests: Array,
     announcements: Array,
-    userRoles: Array,
-
+    success: String,
 });
-
-console.log(props);
-
 
 //Announcement form
 const form = useForm({
@@ -29,6 +27,20 @@ const deleteAnnouncement = (id) => {
         form.delete(route('announcements.destroy', id));
     }
 };
+
+//User Roles
+const page = usePage();
+const userRoles = computed(() => page.props.auth.user?.roles || []);
+
+const isAdmin = computed(() => userRoles.value.includes("admin"));
+const isCoordinator = computed(() => userRoles.value.includes("coordinator"));
+const isKlant = computed(() => userRoles.value.includes("klant"));
+const isLid = computed(() => userRoles.value.includes("lid"));
+const isPenningmeester = computed(() => userRoles.value.includes("penningmeester"));
+const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
+
+
+
 </script>
 
 <template>
@@ -38,6 +50,17 @@ const deleteAnnouncement = (id) => {
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
         </template>
+
+        <!-- Succesmelding -->
+        <div v-if="props.success" class="pt-8">
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
+                <div class="bg-green-50 overflow-scroll shadow-sm rounded-md sm:rounded-lg border border-green-500">
+                    <div class="p-4 rounded">
+                        {{ props.success }}
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="py-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
@@ -56,14 +79,14 @@ const deleteAnnouncement = (id) => {
                                     <i class="fa-regular fa-bell mt-1"></i> <!-- mt-1 helpt bij het beter uitlijnen van de bel met de bovenste regel van de tekst -->
                                     <span class="mx-3">{{ announcement.announcement }}</span>
                                 </p>
-                                <i v-if="userRoles.includes('admin') || userRoles.includes('coordinator')" class="fa-regular fa-trash-can cursor-pointer mt-1 text-red-600" @click="deleteAnnouncement(announcement.id)"></i>
+                                <i v-if="isAdmin || isCoordinator" class="fa-regular fa-trash-can cursor-pointer mt-1 text-red-600" @click="deleteAnnouncement(announcement.id)"></i>
                             </div>
                             <hr class="mb-2">
                         </div>
 
                     </div>
 
-                    <form v-if="userRoles.includes('admin') || userRoles.includes('coordinator')" @submit.prevent="form.post(route('announcements.store'), { onSuccess: () => form.reset() })">
+                    <form v-if="isAdmin || isCoordinator" @submit.prevent="form.post(route('announcements.store'), { onSuccess: () => form.reset() })">
                         <textarea
                             v-model="form.message"
                             placeholder="Voeg een mededeling toe"
@@ -77,17 +100,31 @@ const deleteAnnouncement = (id) => {
             </div>
         </div>
 
-        <div v-if="['admin', 'coordinator', 'lid', 'penningmeester', 'secretaris'].some(role => userRoles.includes(role))" class="pb-8">
+        <div v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <UserLotusRequestsTable :activeUserLotusRequests="props.activeUserLotusRequests" tableTitle="Mijn aangemelde aanvragen" />
             </div>
         </div>
 
-        <div v-if="['admin', 'coordinator', 'lid', 'penningmeester', 'secretaris'].some(role => userRoles.includes(role))" class="pb-8">
+        <div v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <LotusRequestsTable :lotusRequests="props.lotusRequests" tableTitle="Beschikbare aanvragen" />
             </div>
         </div>
+
+        <div v-if="isAdmin || isKlant" class="pb-8">
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
+                <UserLotusRequestsTable :activeUserLotusRequests="props.pendingCustomerLotusRequests" tableTitle="Ingediende aanvragen (nog niet bevestigd door coördinator)" />
+            </div>
+        </div>
+
+        <div v-if="isAdmin || isKlant" class="pb-8">
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
+                <UserLotusRequestsTable :activeUserLotusRequests="props.activeCustomerLotusRequests" tableTitle="Goedgekeurde aanvragen" />
+            </div>
+        </div>
+
+
 
 
     </AuthenticatedLayout>
