@@ -45,6 +45,7 @@ const generatePaymentMark = () => {
     return Math.floor(10000 + Math.random() * 90000).toString(); // 5-cijferig random getal
 };
 form.payment_mark = generatePaymentMark();
+form.customer_id = '1';
 
 //User Roles
 const page = usePage();
@@ -198,16 +199,18 @@ const submit = () => {
 
                             </div>
 
-                            <div>
-                                <InputLabel for="rate_group" value="Tariefgroep (Selecteerveld en voor iedereen?)" />
-                                <TextInput
-                                    id="rate_group"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    v-model="form.rate_group"
-                                    required
-                                />
-                            </div>
+<!--                            <div>-->
+<!--                                <InputLabel for="rate_group" value="Tariefgroep (Selecteerveld en voor iedereen?)" />-->
+<!--                                <TextInput-->
+<!--                                    id="rate_group"-->
+<!--                                    type="text"-->
+<!--                                    class="mt-1 block w-full"-->
+<!--                                    v-model="form.rate_group"-->
+<!--                                    required-->
+<!--                                />-->
+<!--                            </div>-->
+                            <input type="hidden" v-model="form.rate_group" />
+
 
                             <div>
                                 <InputLabel for="details" value="Bijzonderheden" />
