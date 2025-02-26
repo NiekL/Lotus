@@ -45,7 +45,7 @@ const generatePaymentMark = () => {
     return Math.floor(10000 + Math.random() * 90000).toString(); // 5-cijferig random getal
 };
 form.payment_mark = generatePaymentMark();
-form.customer_id = '1';
+form.rate_group = '1';
 
 //User Roles
 const page = usePage();
