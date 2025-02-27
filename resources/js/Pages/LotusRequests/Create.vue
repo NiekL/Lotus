@@ -119,7 +119,7 @@ const submit = () => {
 
                             <!-- CREATE AN (invisible) OPTION to set the customer_id to the current user id if the role is klant. Create an select option to select a klant when the role is 'admin'. -->
                             <!-- Customer selection (Hidden for 'klant', Dropdown for 'admin') -->
-                            <div v-if="isAdmin">
+                            <div v-if="isAdmin || isCoordinator">
                                 <InputLabel for="customer_id" value="Selecteer Klant" />
                                 <select id="customer_id" v-model="form.customer_id" class="block w-full border-gray-300 rounded-md shadow-sm">
                                     <option value="" disabled>Selecteer een klant</option>
@@ -184,6 +184,7 @@ const submit = () => {
                                     type="number"
                                     class="mt-1 block w-full"
                                     v-model="form.amount_lotus"
+                                    min="1"
                                     required
                                 />
                                 </div>

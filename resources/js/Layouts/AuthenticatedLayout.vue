@@ -204,7 +204,7 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                         <hr>
 
                         <NavLink
-                            v-if="isAdmin || isCoordinator || isKlant || isPenningmeester"
+                            v-if="isAdmin || isKlant"
                             :href="route('profile.invoiceinfo')"
                             :active="route().current('profile.invoiceinfo')"
                         >

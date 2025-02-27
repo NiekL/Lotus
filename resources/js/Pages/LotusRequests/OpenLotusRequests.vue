@@ -8,6 +8,7 @@ import { defineProps } from 'vue';
 
 const props = defineProps({
     lotusRequests: Array, // Definieer de lotusRequests prop
+    penningmeesterAllLotusRequests: Array,
     success: String,
 });
 
@@ -40,6 +41,13 @@ const formatTime = (timeString) => {
                 </div>
                 <!-- Gebruik het LotusRequestTable component -->
                 <LotusRequestTable :lotusRequests="props.lotusRequests" tableTitle="Beschikbare aanvragen" />
+            </div>
+        </div>
+
+        <div v-if="props.penningmeesterAllLotusRequests.length > 0" class="pb-8">
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
+                <!-- Gebruik het LotusRequestTable component -->
+                <LotusRequestTable :lotusRequests="props.penningmeesterAllLotusRequests" tableTitle="Alle Lotus Aanvragen" />
             </div>
         </div>
     </AuthenticatedLayout>

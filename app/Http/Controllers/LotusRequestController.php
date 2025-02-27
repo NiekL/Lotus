@@ -51,15 +51,23 @@ class LotusRequestController extends Controller
 
     public function index()
     {
-        // Haal alle open lotusaanvragen op
+        //Voor lid etc
         $lotusRequests = LotusRequest::where('status', 2)
             ->whereDate('date', '>=', now()->toDateString())
             ->orderBy('date', 'asc') // Sorteert oplopend op datum
             ->get();
 
+        $user = auth()->user();
+        if ($user->roles->contains('name', 'admin') || $user->roles->contains('name', 'penningmeester')){
+            $allLotusRequests = LotusRequest::orderBy('date', 'desc')->get();
+        } else {
+            $allLotusRequests = [];
+        }
+
         // Geef de aanvragen door aan de Inertia view
         return Inertia::render('LotusRequests/OpenLotusRequests', [
             'lotusRequests' => $lotusRequests,
+            'penningmeesterAllLotusRequests' => $allLotusRequests,
         ]);
     }
 
@@ -70,7 +78,7 @@ class LotusRequestController extends Controller
 
         // Retrieve the Lotus request along with signed-up users and their pivot data
         $lotusRequest = LotusRequest::with(['users' => function($query) {
-            $query->withPivot('user_played_time', 'user_amount_km', 'user_feedback');
+            $query->withPivot('user_played_time', 'user_amount_km', 'user_feedback', 'user_expenses');
         }])->findOrFail($id);
 
         // Retrieve billing info for the logged-in user
@@ -100,6 +108,7 @@ class LotusRequestController extends Controller
                 'user_played_time' => $pivotData->user_played_time ?? null,
                 'user_amount_km' => $pivotData->user_amount_km ?? null,
                 'user_feedback' => $pivotData->user_feedback ?? null,
+                'user_expenses' => $pivotData->user_expenses ?? null,
             ],
         ]);
     }
@@ -289,6 +298,7 @@ class LotusRequestController extends Controller
             'user_played_time' => 'required|integer|min:0',
             'user_amount_km' => 'required|integer|min:0',
             'user_feedback' => 'nullable|string',
+            'user_expenses' => 'nullable|numeric|min:0',
         ]);
 
         // Update de pivot table met de extra gegevens

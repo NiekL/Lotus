@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, defineProps } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
@@ -10,13 +10,14 @@ import UserLotusRequestTable from "@/Components/UserLotusRequestsTable.vue";
 import LotusRequestTable from "@/Components/LotusRequestsTable.vue";
 
 // Ontvang de gegevens van de gebruiker en zijn/haar aanvragen
-const { member } = usePage().props;
+const props = defineProps({
+    member: Object,
+    lotusRequests: Array,
+});
 
 // Maak reactieve referenties voor de naam en email
-const name = ref(member.name);
-const email = ref(member.email);
-
-const lotusRequests = ref(member.lotus_requests || []);
+const name = ref(props.member.name);
+const email = ref(props.member.email);
 
 
 

@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\LotusRequest;
 use App\Models\User;
 use Inertia\Inertia;
 
@@ -57,9 +58,16 @@ class UserController extends Controller
             $query->withPivot('user_played_time', 'user_amount_km', 'user_feedback'); // Voeg extra velden toe indien nodig
         }])->findOrFail($id);
 
+        if ($user && $user->roles->contains('name', 'klant')){
+            //Logica
+            $lotusRequests = LotusRequest::where('customer_id', $id)->get();
+        } else {
+            $lotusRequests = $user->lotusRequests;
+        }
+
         return Inertia::render('Users/ViewMember', [
             'member' => $user,
-            'lotusRequests' => $user->lotusRequests
+            'lotusRequests' => $lotusRequests,
         ]);
     }
 

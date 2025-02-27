@@ -113,6 +113,7 @@ const copyToClipboard = async (text, fieldId) => {
 const form = ref({
     user_played_time: props.userRequestData.user_played_time ?? '',
     user_amount_km: props.userRequestData.user_amount_km ?? '',
+    user_expenses: props.userRequestData.user_expenses ?? '',
     user_feedback: props.userRequestData.user_feedback ?? '',
     errors: {}
 });
@@ -196,7 +197,7 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                     <h2 class="mb-2 text-md uppercase font-semibold">Aanvraag goedkeuren/afwijzen</h2>
                     <hr class="mb-4">
                     <p v-if="lotusRequest.status === 1" class="mb-4">Deze aanvraag is <strong>nog niet behandeld</strong>.</p>
-                    <p v-if="lotusRequest.status === 2" class="mb-4">Deze aanvraag is <strong class="text-green-600">goegekeurd</strong>. Toch afwijzen? Klik op de onderstaande knop.</p>
+                    <p v-if="lotusRequest.status === 2" class="mb-4">Deze aanvraag is <strong class="text-green-600">goedgekeurd</strong>. Toch afwijzen? Klik op de onderstaande knop.</p>
                     <p v-if="lotusRequest.status === 3" class="mb-4">Deze aanvraag is <strong class="text-red-600">afgewezen</strong>. Toch goedkeuren? Klik op de onderstaande knop.</p>
 
 
@@ -373,6 +374,7 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                                 <div v-if="user.pivot" class="text-gray-600 text-sm mt-2 space-y-1">
                                     <p v-if="!isKlant"><strong>Gespeelde tijd:</strong> {{ user.pivot.user_played_time ?? 'Geen gegevens' }} minuten</p>
                                     <p v-if="!isKlant"><strong>Gereden kilometers:</strong> {{ user.pivot.user_amount_km ?? 'Geen gegevens' }} km</p>
+                                    <p v-if="isAdmin || isSecretaris"><strong>Onkosten:</strong>€ {{ user.pivot.user_expenses ?? 'Geen feedback' }}</p>
                                     <p v-if="!isKlant"><strong>Feedback:</strong> {{ user.pivot.user_feedback ?? 'Geen feedback' }}</p>
                                 </div>
                             </div>
@@ -382,11 +384,10 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
             </div>
         </div>
 
-
         <div v-if="isUserSignedUp" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <h2 class="mb-2 text-md uppercase font-semibold">Speel gegevens(Goede naam?)</h2>
+                    <h2 class="mb-2 text-md uppercase font-semibold">Speel gegevens</h2>
                     <hr class="mb-4">
 
                     <form @submit.prevent="handleSubmit" class="mt-6 space-y-6">
@@ -417,6 +418,21 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                         </div>
 
                         <div>
+                            <InputLabel for="user_expenses" value="Gemaakte onkosten (in €)" />
+                            <TextInput
+                                id="user_expenses"
+                                type="number"
+                                class="block w-full"
+                                v-model="form.user_expenses"
+                                step="0.01"
+                                min="0"
+                                placeholder="Vul bedrag in.."
+                                required
+                            />
+                            <InputError class="mt-2" :message="form.errors.user_expenses" />
+                        </div>
+
+                        <div>
                             <InputLabel for="user_feedback" value="Feedback" />
 
                             <TextAreaInput
@@ -427,6 +443,8 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                             />
 
                         </div>
+
+
 
                         <div class="flex items-center gap-4">
                             <PrimaryButton>Opslaan</PrimaryButton>
