@@ -458,8 +458,8 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                                 </div>
                             </div>
                             <button v-if="isAdmin || isCoordinator" @click="confirmRemoveUser(user.id, user.name)"
-                                    class="ml-auto  text-red-600 rounded-md hover:text-red-700 self-baseline">
-                                <i class="fa-solid fa-trash-can red-600"></i>
+                                    class="ml-auto rounded-md self-baseline">
+                                <i class="fa-regular fa-trash-can cursor-pointer mt-1 text-red-600 hover:text-red-700 "></i>
                             </button>
                         </li>
                     </ul>
