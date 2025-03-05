@@ -15,13 +15,21 @@ class DashboardController extends Controller
 
         // Haal de lotusRequests op (je kunt hier filteren of sorteren indien nodig)
         $announcements = Announcements::all();
+
+        $user = auth()->user();
+
+        $activeUserLotusRequestIds = $user->lotusRequests()
+            ->where('status', 2)
+            ->where('date', '>=', now()->toDateString())
+            ->pluck('id'); // Haalt alleen de IDs op
+
         $lotusRequests = LotusRequest::where('status', 2)
             ->whereDate('date', '>=', now()->toDateString())
+            ->whereNotIn('id', $activeUserLotusRequestIds) // Filtert de aanvragen waar de gebruiker al voor is aangemeld
             ->orderBy('date', 'asc') // Sorteert oplopend op datum
             ->get();
 
         //Haal alle actieve aanvragen op per gebruiker
-        $user = auth()->user();
         $today = now()->startOfDay();
         $activeUserLotusRequests = $user->lotusRequests()
             ->where('status', 2)

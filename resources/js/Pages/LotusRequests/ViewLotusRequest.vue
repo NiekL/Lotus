@@ -1,6 +1,6 @@
 
 <script setup>
-import {onMounted, ref, computed} from 'vue';
+import {onMounted, ref, computed, toRaw} from 'vue';
 import axios from 'axios';
 import { defineProps } from 'vue';
 import { Head, usePage } from '@inertiajs/vue3';
@@ -16,6 +16,7 @@ const props = defineProps({
     signedUpUsers: Array,
     billingInfo: Array,
     userRequestData: Object,
+    nonCustomers: Object,
 });
 
 const notification = ref({ message: '', type: '' });
@@ -24,6 +25,85 @@ const formatTime = (timeString) => {
     const date = new Date(`1970-01-01T${timeString}Z`);
     return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
 };
+
+//Coordinator / admin functie om leden toe te voegen en te verwijderen
+const usersList = computed(() => props.nonCustomers?.original?.nonCustomers || []);
+
+const selectedUser = ref(null);
+const loading = ref(false);
+const errorMessage = ref(null);
+const successMessage = ref(null);
+
+console.log(usersList)
+// Functie voor aanmelden specifiek lid als coordinator of admin
+const addUserToRequest = async () => {
+    if (!selectedUser.value) return;
+
+    loading.value = true;
+    errorMessage.value = null;
+    successMessage.value = null;
+
+    try {
+        const response = await axios.post(`/lotus-requests/${selectedUser.value}/singupSepecificUser`, {
+            lotus_request_id: props.lotusRequest.id, // Extra parameter correct meegeven
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        if (response.data.status === 'success') {
+            successMessage.value = response.data.message;
+
+            if (response.data.user) {
+                props.signedUpUsers.push(response.data.user);
+            }
+        } else {
+            errorMessage.value = response.data.message;
+        }
+
+        selectedUser.value = null; // Reset de selectie
+    } catch (error) {
+        errorMessage.value = error.response?.data?.message || "Er is iets misgegaan.";
+    } finally {
+        loading.value = false;
+    }
+}
+
+const confirmRemoveUser = (userId, userName) => {
+    const confirmation = window.confirm(`Weet je zeker dat je ${userName} wilt verwijderen?`);
+    if (confirmation) {
+        removeUserFromRequest(userId);
+    }
+};
+const removeUserFromRequest = async (userId) => {
+    loading.value = true;
+    errorMessage.value = null;
+    successMessage.value = null;
+
+    try {
+        const response = await axios.delete(`/lotus-requests/${userId}/removeUser`, {
+            data: { lotus_request_id: props.lotusRequest.id } // Body van DELETE request
+        });
+
+        if (response.data.status === 'success') {
+            successMessage.value = response.data.message;
+
+            const index = props.signedUpUsers.findIndex(user => user.id === userId);
+            if (index !== -1) {
+                props.signedUpUsers.splice(index, 1);
+            }
+        } else {
+            errorMessage.value = response.data.message;
+        }
+    } catch (error) {
+        errorMessage.value = error.response?.data?.message || "Er is iets misgegaan.";
+    } finally {
+        loading.value = false;
+    }
+};
+
 
 const acceptRequest = async () => {
     if (!window.confirm("Weet u zeker dat u dit verzoek wilt goedkeuren?")) return;
@@ -118,7 +198,6 @@ const form = ref({
     errors: {}
 });
 
-console.log(props.userRequestData);
 
 const handleSubmit = async () => {
     try {
@@ -378,8 +457,32 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                                     <p v-if="!isKlant"><strong>Feedback:</strong> {{ user.pivot.user_feedback ?? 'Geen feedback' }}</p>
                                 </div>
                             </div>
+                            <button v-if="isAdmin || isCoordinator" @click="confirmRemoveUser(user.id, user.name)"
+                                    class="ml-auto  text-red-600 rounded-md hover:text-red-700 self-baseline">
+                                <i class="fa-solid fa-trash-can red-600"></i>
+                            </button>
                         </li>
                     </ul>
+
+                    <div class="my-4" v-if="isAdmin || isCoordinator">
+                        <h2 class="mb-2 text-md uppercase font-semibold">Leden toevoegen</h2>
+                        <label for="user-select" class="block text-sm font-medium text-gray-700">Selecteer een gebruiker:</label>
+                        <select v-model="selectedUser" id="user-select"
+                                class="mt-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="" disabled>Selecteer een gebruiker</option>
+                            <option v-for="user in usersList" :key="user.id" :value="user.id">
+                                {{ user.name }}
+                            </option>
+                        </select>
+                        <p v-if="errorMessage" class="mt-2 text-red-600">{{ errorMessage }}</p>
+                        <p v-if="successMessage" class="mt-2 text-green-600">{{ successMessage }}</p>
+                        <button @click="addUserToRequest"
+                                :disabled="!selectedUser || loading"
+                                class="mt-4 inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:bg-gray-400">
+                            {{ loading ? 'Bezig met aanmelden...' : 'Toevoegen' }}
+                        </button>
+
+                    </div>
                 </div>
             </div>
         </div>

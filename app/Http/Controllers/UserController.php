@@ -52,6 +52,16 @@ class UserController extends Controller
         return response()->json(['customers' => $customers]);
     }
 
+    public function getNonCustomers()
+    {
+        $nonCustomers = User::whereDoesntHave('roles', function ($query) {
+            $query->where('role_id', 3);
+        })->get(['id', 'name', 'email'])->sortBy('name');
+
+        return response()->json(['nonCustomers' => $nonCustomers]);
+    }
+
+
     public function show($id)
     {
         $user = User::with(['lotusRequests' => function ($query) {

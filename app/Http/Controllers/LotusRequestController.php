@@ -51,13 +51,19 @@ class LotusRequestController extends Controller
 
     public function index()
     {
-        //Voor lid etc
+        //Voor lid et
+        $user = auth()->user();
+        $activeUserLotusRequestIds = $user->lotusRequests()
+            ->where('status', 2)
+            ->where('date', '>=', now()->toDateString())
+            ->pluck('id'); // Haalt alleen de IDs op
+
         $lotusRequests = LotusRequest::where('status', 2)
             ->whereDate('date', '>=', now()->toDateString())
+            ->whereNotIn('id', $activeUserLotusRequestIds) // Filtert de aanvragen waar de gebruiker al voor is aangemeld
             ->orderBy('date', 'asc') // Sorteert oplopend op datum
             ->get();
 
-        $user = auth()->user();
         if ($user->roles->contains('name', 'admin') || $user->roles->contains('name', 'penningmeester')){
             $allLotusRequests = LotusRequest::orderBy('date', 'desc')->get();
         } else {
@@ -100,6 +106,10 @@ class LotusRequestController extends Controller
         $user = auth()->user();
         $pivotData = $user->lotusRequests()->where('lotus_request_id', $id)->first()->pivot ?? null;
 
+        //Get non customers
+        $userController = new UserController();
+        $nonCustomers = $userController->getNonCustomers();
+
         return Inertia::render('LotusRequests/ViewLotusRequest', [
             'lotusRequest' => $lotusRequest,
             'signedUpUsers' => $lotusRequest->users,  // Users with pivot data
@@ -110,6 +120,7 @@ class LotusRequestController extends Controller
                 'user_feedback' => $pivotData->user_feedback ?? null,
                 'user_expenses' => $pivotData->user_expenses ?? null,
             ],
+            'nonCustomers' => $nonCustomers,
         ]);
     }
 
@@ -257,6 +268,69 @@ class LotusRequestController extends Controller
         return redirect()->route('lotus-requests.viewlotusrequest', ['id' => $id])
             ->with('success', 'Succesvol aangemeld voor de aanvraag.');
     }
+
+//    public function singupSepecificUser(Request $request, $id){
+//        dd('test' . $id . ' Lotus request: ' . $request);
+//    }
+
+    public function singupSepecificUser(Request $request, $userId)
+    {
+        $request->validate([
+            'lotus_request_id' => 'required|exists:lotus_requests,id',
+        ]);
+
+        $lotusRequest = LotusRequest::findOrFail($request->lotus_request_id);
+        $user = User::findOrFail($userId);
+
+        if ($lotusRequest->filled_spots >= $lotusRequest->amount_lotus) {
+            return response()->json(['message' => 'Aanmelden mislukt. De aanvraag zit vol.', 'status' => 'error'], 400);
+        }
+
+        if ($lotusRequest->users()->where('user_id', $user->id)->exists()) {
+            return response()->json(['message' => 'Aanmelden mislukt. Deze gebruiker is al aangemeld.', 'status' => 'error'], 400);
+        }
+
+        // Koppel gebruiker aan Lotus aanvraag
+        $lotusRequest->users()->attach($user->id);
+        $lotusRequest->increment('filled_spots');
+
+        return response()->json([
+            'message' => 'Succesvol aangemeld!',
+            'status' => 'success',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'pivot' => [] // Lege pivot voor nu, kan later gevuld worden
+            ]
+        ]);
+    }
+
+    public function removeUserFromRequest(Request $request, $userId)
+    {
+        $request->validate([
+            'lotus_request_id' => 'required|exists:lotus_requests,id',
+        ]);
+
+        $lotusRequest = LotusRequest::findOrFail($request->lotus_request_id);
+        $user = User::findOrFail($userId);
+
+        // Controleer of de gebruiker is aangemeld
+        if (!$lotusRequest->users()->where('user_id', $user->id)->exists()) {
+            return response()->json(['message' => 'Deze gebruiker is niet aangemeld voor deze aanvraag.', 'status' => 'error'], 400);
+        }
+
+        // Verwijder de gebruiker uit de aanvraag
+        $lotusRequest->users()->detach($user->id);
+        $lotusRequest->decrement('filled_spots');
+
+        return response()->json([
+            'message' => 'Gebruiker succesvol verwijderd.',
+            'status' => 'success'
+        ]);
+    }
+
+
+
 
     public function cancelSignup(Request $request, $id)
     {

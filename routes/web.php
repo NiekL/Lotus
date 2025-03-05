@@ -90,6 +90,16 @@ Route::post('/lotus-requests/decline/{id}', [LotusRequestController::class, 'dec
 Route::post('/lotus-requests/{id}/signup', [LotusRequestController::class, 'signup'])
     ->name('lotus-requests.signup');
 
+//Specifieke gebruiker aanmelden voor aanvraag als coordinator
+Route::post('/lotus-requests/{id}/singupSepecificUser', [LotusRequestController::class, 'singupSepecificUser'])
+    ->middleware(['auth', 'verified', 'role:admin|coordinator'])
+    ->name('lotus-requests.singupSepecificUser');
+
+Route::delete('/lotus-requests/{userId}/removeUser', [LotusRequestController::class, 'removeUserFromRequest'])
+    ->middleware(['auth', 'verified', 'role:admin|coordinator']);
+
+
+
 //Gebruikers afmelding voor aanvraag
 Route::post('/lotus-requests/{id}/cancel-signup', [LotusRequestController::class, 'cancelSignup'])
     ->name('lotus-requests.cancelSignup');
@@ -117,6 +127,12 @@ Route::get('/users/customeradministration', [UserController::class, 'customers']
 Route::get('/users/customersOnly', [UserController::class, 'getCustomersOnly'])
     ->middleware(['auth', 'verified', 'role:admin|coordinator'])
     ->name('users.customersOnly');
+
+//Coordinator functies voor leden toevoegen aan een aanvraag
+Route::get('/users/nonCustomers', [UserController::class, 'getNonCustomers'])
+    ->middleware(['auth', 'verified', 'role:admin|coordinator'])
+    ->name('users.nonCustomers');
+
 
 //Bekijk lid
 Route::get('/users/viewmember/{id}', [UserController::class, 'show'])
