@@ -105,6 +105,9 @@ Route::post('/lotus-requests/{id}/cancel-signup', [LotusRequestController::class
     ->name('lotus-requests.cancelSignup');
 Route::get('/lotus-requests/{id}/check-signup', [LotusRequestController::class, 'checkSignup'])
     ->name('lotus-requests.checkSignup');
+Route::post('/lotus-requests/{lotusRequest}/unregister', [LotusRequestController::class, 'unregister'])
+    ->middleware('auth');
+
 
 //Gebruikers feedback (km vergoeding etc) op aanvraag
 Route::post('/lotus-requests/{id}/submit-details', [LotusRequestController::class, 'submitDetails'])

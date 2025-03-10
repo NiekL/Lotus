@@ -329,6 +329,18 @@ class LotusRequestController extends Controller
         ]);
     }
 
+    public function unregister(Request $request, LotusRequest $lotusRequest)
+    {
+        if (!$lotusRequest->canUnregister()) {
+            return response()->json([
+                'message' => 'Afmelden niet meer mogelijk, neem contact op met de coördinator.'
+            ], 403);
+        }
+
+        $request->user()->lotusRequests()->detach($lotusRequest->id);
+
+        return response()->json(['message' => 'Succesvol afgemeld.']);
+    }
 
 
 

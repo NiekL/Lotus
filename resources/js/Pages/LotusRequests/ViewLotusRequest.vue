@@ -34,11 +34,9 @@ const loading = ref(false);
 const errorMessage = ref(null);
 const successMessage = ref(null);
 
-console.log(usersList)
 // Functie voor aanmelden specifiek lid als coordinator of admin
 const addUserToRequest = async () => {
     if (!selectedUser.value) return;
-
     loading.value = true;
     errorMessage.value = null;
     successMessage.value = null;
@@ -138,6 +136,15 @@ const canSignup = computed(() => filledSpots.value < props.lotusRequest.amount_l
 // const canSignup = computed(() => {
 //     return props.lotusRequest.filled_spots < props.lotusRequest.amount_lotus;
 // });
+// **Controle of afmelden nog mogelijk is (minimaal 14 dagen van tevoren)**
+const canUnregister = computed(() => {
+    const today = new Date(); // Correct gedefinieerd binnen de computed property
+    const requestDate = new Date(props.lotusRequest.date);
+    const fourteenDaysLater = new Date();
+    fourteenDaysLater.setDate(today.getDate() + 14);
+    return requestDate > fourteenDaysLater;
+});
+
 
 // Controleer de aanmeldstatus van de gebruiker
 onMounted(async () => {
@@ -162,13 +169,21 @@ const signup = async () => {
 
 // Functie voor afmelden
 const cancelSignup = async () => {
+    if (!canUnregister.value) {
+        notification.value = { message: 'Afmelden niet meer mogelijk, neem contact op met de coördinator.', type: 'error' };
+        return;
+    }
+
     try {
         await axios.post(`/lotus-requests/${props.lotusRequest.id}/cancel-signup`);
         notification.value = { message: 'Je hebt je succesvol afgemeld voor de aanvraag.', type: 'success' };
         isUserSignedUp.value = false;
         filledSpots.value--;
     } catch (error) {
-        notification.value = { message: error.response.data.message || 'Er is een fout opgetreden bij het afmelden.', type: 'error' };
+        notification.value = {
+            message: error.response?.data?.message || 'Er is een fout opgetreden bij het afmelden.',
+            type: 'error'
+        };
         console.error(error);
     }
 };
@@ -185,6 +200,33 @@ const copyToClipboard = async (text, fieldId) => {
         }, 2000); // Optional: Reset after 2 seconds
     } catch (err) {
         console.error('Failed to copy:', err);
+    }
+};
+
+console.log(props.billingInfo);
+
+// Kopieer alle factuurgegevens als één string, gescheiden door een komma
+const copyAllBillingInfo = async () => {
+    try {
+        const allBillingData = [
+            props.lotusRequest.payment_mark,
+            props.lotusRequest.rate_group,
+            props.billingInfo.billing_name,
+            props.billingInfo.billing_address,
+            props.billingInfo.billing_zipcode,
+            props.billingInfo.billing_city,
+            props.billingInfo.billing_contactperson,
+            props.billingInfo.billing_phone,
+            props.billingInfo.billing_email
+        ].join(', '); // Maak een string met komma's
+
+        await navigator.clipboard.writeText(allBillingData);
+        lastCopied.value = 'all';
+        setTimeout(() => {
+            lastCopied.value = null;
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy all billing info:', err);
     }
 };
 
@@ -263,7 +305,13 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                     <button v-if="!isUserSignedUp && canSignup" @click="signup" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 mr-4">
                         Aanmelden
                     </button>
-                    <button v-if="isUserSignedUp" @click="cancelSignup" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+
+                    <p v-if="!canUnregister">Afmelden niet meer mogelijk, dit moet minimaal 14 dagen van te voren. Toch afmelden, neem contact op met de coördinator.</p>
+                    <button
+                        v-if="isUserSignedUp"
+                        :disabled="!canUnregister"
+                        @click="cancelSignup"
+                        class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed">
                         Afmelden
                     </button>
                 </div>
@@ -664,6 +712,15 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                                    @click="copyToClipboard(billingInfo.billing_email, 'billing_email')"></i>
                             </p>
                         </div>
+
+                        <!-- Alle gegevens -->
+                        <button
+                            @click="copyAllBillingInfo"
+                            class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none transition ease-in-out duration-150">
+                            Kopieer alle gegevens&nbsp;
+                            <i :class="lastCopied === 'all' ? 'fa-solid fa-check text-green-700' : 'fa-regular fa-copy'"></i>
+                        </button>
+
                     </div>
                 </div>
             </div>

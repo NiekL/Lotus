@@ -47,4 +47,9 @@ class LotusRequest extends Model
     {
         return $this->belongsToMany(User::class);
     }
+
+    public function canUnregister(): bool
+    {
+        return $this->date->isAfter(now()->addDays(14));
+    }
 }
