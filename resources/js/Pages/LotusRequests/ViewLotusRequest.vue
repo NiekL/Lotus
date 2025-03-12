@@ -10,6 +10,7 @@ import TextAreaInput from "@/Components/TextAreaInput.vue";
 import TextInput from "@/Components/TextInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import InputError from "@/Components/InputError.vue";
+import SecondaryButton from "@/Components/SecondaryButton.vue";
 
 const props = defineProps({
     lotusRequest: Object, // Define the lotusRequest prop
@@ -20,7 +21,6 @@ const props = defineProps({
 });
 
 const notification = ref({ message: '', type: '' });
-
 const formatTime = (timeString) => {
     const date = new Date(`1970-01-01T${timeString}Z`);
     return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
@@ -240,6 +240,37 @@ const form = ref({
     errors: {}
 });
 
+const editMode = ref(false);
+const lotusRequestCopy = ref({ ...props.lotusRequest });
+
+
+const updateLotusRequest = async () => {
+    try {
+        if (lotusRequestCopy.value.arrival_time) {
+            lotusRequestCopy.value.arrival_time = lotusRequestCopy.value.arrival_time.substring(0, 5);
+        }
+
+        if (lotusRequestCopy.value.end_time) {
+            lotusRequestCopy.value.end_time = lotusRequestCopy.value.end_time.substring(0, 5);
+        }
+
+        const response = await axios.put(`/lotus-requests/${props.lotusRequest.id}`, lotusRequestCopy.value);
+        notification.value = { message: 'Aanvraag succesvol bijgewerkt.', type: 'success' };
+
+        // Update de originele data na succesvolle bewerking
+        Object.assign(props.lotusRequest, lotusRequestCopy.value);
+
+        editMode.value = false;
+    } catch (error) {
+        notification.value = { message: 'Fout bij opslaan. Controleer de invoer.', type: 'error' };
+        console.error(error);
+    }
+};
+
+const resetEditForm = () => {
+    lotusRequestCopy.value = { ...props.lotusRequest }; // Reset de kopie naar originele waarden
+    editMode.value = false; // Sluit de bewerkingsmodus
+};
 
 const handleSubmit = async () => {
     try {
@@ -256,6 +287,13 @@ const handleSubmit = async () => {
     }, 100);
 };
 
+const googleMapsLink = computed(() => {
+    const { streetname, housenumber, zipcode, city } = props.lotusRequest;
+    const query = encodeURIComponent(`${streetname} ${housenumber}, ${zipcode} ${city}`);
+    return `https://www.google.com/maps/search/?api=1&query=${query}`;
+});
+
+
 //User Roles
 const page = usePage();
 const userRoles = computed(() => page.props.auth.user?.roles || []);
@@ -267,6 +305,14 @@ const isLid = computed(() => userRoles.value.includes("lid"));
 const isPenningmeester = computed(() => userRoles.value.includes("penningmeester"));
 const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
 
+
+const canEdit = computed(() => {
+    const today = new Date(); // Correct gedefinieerd binnen de computed property
+    const requestDate = new Date(props.lotusRequest.date);
+    const offsetDaysLater = new Date();
+    offsetDaysLater.setDate(today.getDate() + 2);
+    return requestDate > offsetDaysLater;
+});
 
 </script>
 
@@ -318,7 +364,7 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
             </div>
         </div>
 
-        <div v-if="isAdmin || isCoordinator || isSecretaris" class="pb-8">
+        <div v-if="isAdmin || isCoordinator" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md uppercase font-semibold">Aanvraag goedkeuren/afwijzen</h2>
@@ -345,145 +391,138 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
             </div>
         </div>
 
-
-        <div class="pb-8" :class="{ 'pt-8': isKlant }">
+        <form @submit.prevent="updateLotusRequest">
+        <div v-if="isAdmin || isCoordinator || isKlant" class="pb-8" :class="{ 'pt-8': isKlant}" >
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg" :class="{'bg-amber-50': editMode }">
+                    <h2 class="mb-2 text-md uppercase font-semibold">Aanvraag bewerken</h2>
+                    <hr class="mb-4">
+                    <div v-if="!canEdit && isKlant" class="">
+                        <p class="text-red-600">Bewerken van de aanvraag niet meer mogelijk (maximaal 2 dagen van te voren). <br> Toch wijzigingen doorvoeren? Neem contact op met de coördinator.</p>
+                    </div>
+                    <div v-else>
+                        <p class="mb-4">Klik op de knop om de aanvraag te bewerken. De gegevens in de gele blokken zijn aan te passen. Wanneer je klaar bent klikt vervolgens op opslaan.</p>
+                        <button @click="editMode = !editMode" v-if="!editMode && (isCoordinator || isAdmin || isKlant)" class=" inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150" type="button">
+                            {{ editMode ? 'Annuleer bewerking' : 'Bewerk aanvraag' }}
+                        </button>
+
+                        <div v-if="editMode" class="flex items-center gap-4">
+                            <PrimaryButton type="submit">Opslaan</PrimaryButton>
+                            <SecondaryButton @click="resetEditForm" type="button">Annuleren</SecondaryButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pb-8" >
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
+                <div :class="{'bg-amber-50': editMode }" class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md uppercase font-semibold">Gegevens aanvraag</h2>
                     <hr class="mb-4">
                     <!-- Naam aanvraag -->
                     <div class="mb-4">
                         <InputLabel for="name" value="Naam bedrijf/organisatie" />
-                        <p class="border p-2 rounded">
-                            {{ lotusRequest.name }}
-                        </p>
+                        <TextInput id="name" type="text" v-model="lotusRequestCopy.name" class="w-full" :disabled="!editMode" required />
                     </div>
 
-                    <!-- Beschrijving -->
                     <div class="mb-4">
                         <InputLabel for="description" value="Beschrijving" />
-                        <p class="border p-2 rounded" v-if="!lotusRequest.description">Geen beschrijving toegevoegd.</p>
-                        <p class="border p-2 rounded" v-else>{{ lotusRequest.description }}</p>
+                        <TextAreaInput id="description" v-model="lotusRequestCopy.description" class="w-full" :disabled="!editMode" />
                     </div>
 
                     <div class="mb-4">
-                        <InputLabel for="number_of_people" value="Aantal benodigde lotusslachtoffers " />
-                        <p class="border p-2 rounded">
-                            {{ lotusRequest.amount_lotus }}
-                        </p>
+                        <InputLabel for="amount_lotus" value="Aantal lotusslachtoffers nodig" />
+                        <TextInput id="amount_lotus" type="number" v-model="lotusRequestCopy.amount_lotus" class="w-full" min="1" :disabled="!editMode" required />
                     </div>
 
                     <!-- Bijzonderheden -->
                     <div class="mb-4">
-                        <InputLabel for="special_requests" value="Bijzonderheden" />
-                        <p class="border p-2 rounded">
-                            {{ lotusRequest.details }}
-                        </p>
+                        <InputLabel for="details" value="Bijzonderheden" />
+                        <TextAreaInput id="details" v-model="lotusRequestCopy.details" class="w-full" :disabled="!editMode" />
                     </div>
+
+
                 </div>
             </div>
         </div>
 
         <div class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg" :class="{'bg-amber-50': editMode }">
                     <h2 class="mb-2 text-md uppercase font-semibold">Datum, tijd en locatie</h2>
                     <hr class="mb-4">
                     <!-- Begindatum en tijd / Einddatum en tijd -->
-                    <div class="flex gap-6 flex-wrap lg:flex-nowrap mb-4">
+                    <div class="flex gap-6 flex-wrap lg:flex-nowrap">
                         <div class="w-full lg:w-1/3">
                             <InputLabel for="date" value="Datum" />
-                            <p class="border p-2 rounded">
-                                {{ new Date(lotusRequest.date).toLocaleDateString('nl-NL') }}
-                            </p>
-                        </div>
-                        <div class="w-full lg:w-1/3">
-                            <InputLabel for="arrival_time" value="Aanvangs tijd" />
-                            <p class="border p-2 rounded">
-                                {{ formatTime(lotusRequest.arrival_time) }}
-                            </p>
+                            <TextInput id="date" type="date" v-model="lotusRequestCopy.date" class="w-full" :disabled="!editMode" required />
                         </div>
 
                         <div class="w-full lg:w-1/3">
-                            <InputLabel for="date_time" value="Eindtijd" />
-                            <p class="border p-2 rounded">
-                                {{ formatTime(lotusRequest.end_time) }}
+                            <InputLabel for="arrival_time" value="Starttijd" />
+                            <TextInput id="arrival_time" type="time" v-model.lazy="lotusRequestCopy.arrival_time" class="w-full" :disabled="!editMode" required />
 
-                            </p>
+                        </div>
+
+                        <div class="w-full lg:w-1/3">
+                            <InputLabel for="end_time" value="Eindtijd" />
+                            <TextInput id="end_time" type="time" v-model.lazy="lotusRequestCopy.end_time" class="w-full" :disabled="!editMode" required />
+
                         </div>
                     </div>
 
-                    <div class="flex gap-6 flex-wrap lg:flex-nowrap mb-4">
+                    <div class="flex gap-6 flex-wrap lg:flex-nowrap">
                         <div class="w-full lg:w-1/3">
-                            <InputLabel for="street_name" value="Straatnaam en huisnummer" />
-                            <p class="border p-2 rounded flex justify-between items-center">
-                                <span>{{ lotusRequest.street_name }}  {{ lotusRequest.house_number }}</span>
-                                <i :class="lastCopied === 'street_name' ? 'fa-solid fa-check text-green-700' : 'fa-regular fa-copy'"
-                                   @click="copyToClipboard(lotusRequest.street_name + ' ' + lotusRequest.house_number, 'street_name')">
-                                </i>
-                            </p>
+                            <InputLabel for="street_name" value="Straatnaam" />
+                            <TextInput id="street_name" type="text" v-model="lotusRequestCopy.street_name" class="w-full" :disabled="!editMode" required />
                         </div>
 
+                        <div class="w-full lg:w-1/3">
+                            <InputLabel for="house_number" value="Huisnummer" />
+                            <TextInput id="house_number" type="text" v-model="lotusRequestCopy.house_number" class="w-full" :disabled="!editMode" required />
+                        </div>
 
                         <div class="w-full lg:w-1/3">
-                            <InputLabel for="postal_code" value="Postcode" />
-                            <p class="border p-2 rounded flex justify-between items-center">
-                                <span>{{ lotusRequest.zipcode }}</span>
-                                <i :class="lastCopied === 'zipcode' ? 'fa-solid fa-check text-green-700' : 'fa-regular fa-copy'"
-                                   @click="copyToClipboard(lotusRequest.zipcode, 'zipcode')"></i>
-                            </p>
-                        </div>
-                        <div class="w-full lg:w-1/3">
-                            <InputLabel for="location" value="Plaats" />
-                            <p class="border p-2 rounded flex justify-between items-center">
-                                <span>{{ lotusRequest.city }}</span>
-                                <i :class="lastCopied === 'city' ? 'fa-solid fa-check text-green-700' : 'fa-regular fa-copy'"
-                                   @click="copyToClipboard(lotusRequest.city, 'city')"></i>
-                            </p>
+                            <InputLabel for="zipcode" value="Postcode" />
+                            <TextInput id="zipcode" type="text" v-model="lotusRequestCopy.zipcode" class="w-full" :disabled="!editMode" required />
                         </div>
                     </div>
+
+                    <a :href="googleMapsLink">Open in maps</a>
                 </div>
             </div>
         </div>
 
         <div class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg" :class="{'bg-amber-50': editMode }">
                     <h2 class="mb-2 text-md uppercase font-semibold">Contactgegevens aanvraag</h2>
                     <hr class="mb-4">
 
                     <!-- Naam aanvrager / Plaats / Straatnaam / Huisnummer / Postcode -->
                     <div class="mb-4">
                         <InputLabel for="contact_person" value="Contactpersoon" />
-                        <p class="border p-2 rounded flex justify-between items-center">
-                            <span>{{ lotusRequest.contact_person }}</span>
-                            <i :class="lastCopied === 'contact_person' ? 'fa-solid fa-check text-green-700' : 'fa-regular fa-copy'"
-                               @click="copyToClipboard(lotusRequest.contact_person, 'contact_person')"></i>
-
-                        </p>
+                        <TextInput id="contact_person" type="text" v-model="lotusRequestCopy.contact_person" class="w-full" :disabled="!editMode" required />
                     </div>
 
                     <div class="mb-4">
                         <InputLabel for="contact_phone" value="Telefoonnummer" />
-                        <p class="border p-2 rounded flex justify-between items-center">
-                            <span>{{ lotusRequest.contact_phone }}</span>
-                            <i :class="lastCopied === 'contact_phone' ? 'fa-solid fa-check text-green-700' : 'fa-regular fa-copy'"
-                               @click="copyToClipboard(lotusRequest.contact_phone, 'contact_phone')"></i>
-
-                        </p>
+                        <TextInput id="contact_phone" type="text" v-model="lotusRequestCopy.contact_phone" class="w-full" :disabled="!editMode" required />
                     </div>
+
                     <div class="mb-4">
-                        <InputLabel for="contact_email" value="Contact email" />
-                        <p class="border p-2 rounded flex justify-between items-center">
-                            <span>{{ lotusRequest.contact_email }}</span>
-                            <i :class="lastCopied === 'contact_email' ? 'fa-solid fa-check text-green-700' : 'fa-regular fa-copy'"
-                               @click="copyToClipboard(lotusRequest.contact_email, 'contact_email')"></i>
-
-                        </p>
+                        <InputLabel for="contact_email" value="E-mail" />
+                        <TextInput id="contact_email" type="email" v-model="lotusRequestCopy.contact_email" class="w-full" :disabled="!editMode" required />
                     </div>
+
+                    <input type="hidden" v-model="lotusRequestCopy.rate_group"/>
+
+
                 </div>
             </div>
         </div>
+        </form>
 
         <div class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">

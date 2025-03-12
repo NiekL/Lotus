@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 use App\Models\LotusRequest;
+use Carbon\Carbon;
 
 class LotusRequestController extends Controller
 {
@@ -99,7 +100,6 @@ class LotusRequestController extends Controller
             'billing_zipcode' => '',
             'billing_city' => ''
         ]);
-
 
 
         // Retrieve the current user's pivot data for this request, if it exists
@@ -394,5 +394,54 @@ class LotusRequestController extends Controller
         return redirect()->route('lotus-requests.viewlotusrequest', ['id' => $id])
             ->with('success', 'Gegevens succesvol doorgegeven.');
     }
+
+    public function edit(LotusRequest $lotusRequest)
+    {
+        $this->authorize('update', $lotusRequest);
+        return response()->json($lotusRequest);
+    }
+
+    public function update(Request $request, LotusRequest $lotusRequest)
+    {
+
+
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'date' => 'required|date',
+            'arrival_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i',
+            'amount_lotus' => 'required|integer|min:1',
+            'payment_mark' => 'nullable|string',
+            'rate_group' => 'nullable|integer',
+            'details' => 'nullable|string',
+            'city' => 'required|string|max:255',
+            'street_name' => 'required|string|max:255',
+            'house_number' => 'required|string|max:10',
+            'zipcode' => 'required|string|max:10',
+            'contact_person' => 'required|string|max:255',
+            'contact_phone' => 'required|string|max:20',
+            'contact_email' => 'required|email|max:255',
+        ]);
+
+        $user = auth()->user();
+
+        // Controleer of de gebruiker de rol 'klant' heeft
+        if ($user->roles->contains('name', 'admin')) {
+            $date = Carbon::parse($validated['date']);
+
+            // Controleer of de datum binnen 5 dagen ligt TODO
+            if ($date->lt(Carbon::now()->addDays(10))) {
+                return response()->json(['error' => 'Als klant moet de datum minstens 5 dagen in de toekomst liggen.'], 422);
+            }
+        }
+
+        $lotusRequest->update($validated);
+
+        return response()->json(['message' => 'LotusRequest succesvol bijgewerkt!', 'lotusRequest' => $lotusRequest]);
+    }
+
+
 
 }

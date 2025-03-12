@@ -74,6 +74,17 @@ Route::get('/lotus-requests/viewlotusrequest', [LotusRequestController::class, '
     ->middleware(['auth', 'verified'])
     ->name('lotus-requests.viewlotusrequest');
 
+//Aanvragen bewerken
+Route::middleware(['auth'])->group(function () {
+    Route::get('/lotus-requests/{lotusRequest}/edit', [LotusRequestController::class, 'edit'])
+        ->middleware(['auth', 'verified','role:admin|coordinator|klant'])
+        ->name('lotus-requests.edit');
+    Route::put('/lotus-requests/{lotusRequest}', [LotusRequestController::class, 'update'])
+        ->middleware(['auth', 'verified','role:admin|coordinator|klant'])
+        ->name('lotus-requests.update');
+});
+
+
 //Aanvragen accepteren of afwijzen overzicht
 Route::get('/lotus-requests/acceptlotusrequests', [LotusRequestController::class, 'showAcceptLotusRequests'])
     ->middleware(['auth', 'verified','role:admin|coordinator|klant'])
