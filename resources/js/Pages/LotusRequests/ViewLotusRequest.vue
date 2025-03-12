@@ -242,6 +242,7 @@ const form = ref({
 
 const editMode = ref(false);
 const lotusRequestCopy = ref({ ...props.lotusRequest });
+let editMessage;
 
 
 const updateLotusRequest = async () => {
@@ -256,6 +257,7 @@ const updateLotusRequest = async () => {
 
         const response = await axios.put(`/lotus-requests/${props.lotusRequest.id}`, lotusRequestCopy.value);
         notification.value = { message: 'Aanvraag succesvol bijgewerkt.', type: 'success' };
+        editMessage = response.data.editMessage;
 
         // Update de originele data na succesvolle bewerking
         Object.assign(props.lotusRequest, lotusRequestCopy.value);
@@ -312,6 +314,11 @@ const canEdit = computed(() => {
     const offsetDaysLater = new Date();
     offsetDaysLater.setDate(today.getDate() + 2);
     return requestDate > offsetDaysLater;
+});
+
+const editButtonFunction = computed(() => {
+    editMode = !editMode;
+
 });
 
 </script>
@@ -410,6 +417,9 @@ const canEdit = computed(() => {
                             <PrimaryButton type="submit">Opslaan</PrimaryButton>
                             <SecondaryButton @click="resetEditForm" type="button">Annuleren</SecondaryButton>
                         </div>
+
+                        <p v-if="editMessage" class="mt-2 text-green-600">{{ editMessage }}</p>
+
                     </div>
                 </div>
             </div>

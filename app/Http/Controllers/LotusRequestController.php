@@ -425,21 +425,10 @@ class LotusRequestController extends Controller
             'contact_email' => 'required|email|max:255',
         ]);
 
-        $user = auth()->user();
-
-        // Controleer of de gebruiker de rol 'klant' heeft
-        if ($user->roles->contains('name', 'admin')) {
-            $date = Carbon::parse($validated['date']);
-
-            // Controleer of de datum binnen 5 dagen ligt TODO
-            if ($date->lt(Carbon::now()->addDays(10))) {
-                return response()->json(['error' => 'Als klant moet de datum minstens 5 dagen in de toekomst liggen.'], 422);
-            }
-        }
 
         $lotusRequest->update($validated);
 
-        return response()->json(['message' => 'LotusRequest succesvol bijgewerkt!', 'lotusRequest' => $lotusRequest]);
+        return response()->json(['editMessage' => 'Lotus aanvraag succesvol bijgewerkt!', 'lotusRequest' => $lotusRequest]);
     }
 
 
