@@ -34,6 +34,9 @@ const loading = ref(false);
 const errorMessage = ref(null);
 const successMessage = ref(null);
 
+var usersSignedUp = ref(props.lotusRequest.filled_spots).value;
+
+
 // Functie voor aanmelden specifiek lid als coordinator of admin
 const addUserToRequest = async () => {
     if (!selectedUser.value) return;
@@ -53,7 +56,8 @@ const addUserToRequest = async () => {
 
         if (response.data.status === 'success') {
             successMessage.value = response.data.message;
-
+            //Filled spots ophogen
+            usersSignedUp++;
             if (response.data.user) {
                 props.signedUpUsers.push(response.data.user);
             }
@@ -71,6 +75,7 @@ const addUserToRequest = async () => {
 
 const confirmRemoveUser = (userId, userName) => {
     const confirmation = window.confirm(`Weet je zeker dat je ${userName} wilt verwijderen?`);
+    usersSignedUp--;
     if (confirmation) {
         removeUserFromRequest(userId);
     }
@@ -129,6 +134,8 @@ const declineRequest = async () => {
     }
 };
 
+
+
 const isUserSignedUp = ref(false);
 const filledSpots = ref(props.lotusRequest.filled_spots);
 const canSignup = computed(() => filledSpots.value < props.lotusRequest.amount_lotus);
@@ -136,13 +143,13 @@ const canSignup = computed(() => filledSpots.value < props.lotusRequest.amount_l
 // const canSignup = computed(() => {
 //     return props.lotusRequest.filled_spots < props.lotusRequest.amount_lotus;
 // });
-// **Controle of afmelden nog mogelijk is (minimaal 14 dagen van tevoren)**
+// **Controle of afmelden nog mogelijk is (minimaal 2 dagen van tevoren)**
 const canUnregister = computed(() => {
     const today = new Date(); // Correct gedefinieerd binnen de computed property
     const requestDate = new Date(props.lotusRequest.date);
-    const fourteenDaysLater = new Date();
-    fourteenDaysLater.setDate(today.getDate() + 14);
-    return requestDate > fourteenDaysLater;
+    const twoDaysLater = new Date();
+    twoDaysLater.setDate(today.getDate() + 2);
+    return requestDate > twoDaysLater;
 });
 
 
@@ -155,6 +162,27 @@ onMounted(async () => {
         console.error('Fout bij het controleren van de aanmeldstatus:', error);
     }
 });
+
+//Als coordinator de aanvraag dichtzetten
+const toggleClosedStatus = async () => {
+    // Vragen of deze check erbij moet?
+    if (usersSignedUp > props.lotusRequest.amount_lotus) {
+        notification.value = { message: 'Deze aanvraag kan niet gesloten worden omdat er meer lotussen aan gekoppeld zijn dan dat er wordt gevraagd door de klant.', type: 'error' };
+        window.scrollTo(0,0);
+        return;
+    }
+
+    if (!window.confirm(`Wilt u deze aanvraag ${props.lotusRequest.is_closed ? 'heropenen' : 'sluiten'}?`)) return;
+
+    try {
+        const response = await axios.post(`/lotus-requests/toggle-closed/${props.lotusRequest.id}`);
+        notification.value = { message: 'Aanvraagstatus succesvol gewijzigd.', type: 'success' };
+        props.lotusRequest.is_closed = response.data.is_closed; // Update de status lokaal
+    } catch (error) {
+        notification.value = { message: 'Er is een fout opgetreden bij het wijzigen van de status.', type: 'error' };
+        console.error(error);
+    }
+};
 
 // Functie voor aanmelden
 const signup = async () => {
@@ -203,7 +231,6 @@ const copyToClipboard = async (text, fieldId) => {
     }
 };
 
-console.log(props.billingInfo);
 
 // Kopieer alle factuurgegevens als één string, gescheiden door een komma
 const copyAllBillingInfo = async () => {
@@ -318,7 +345,6 @@ const canEdit = computed(() => {
 
 const editButtonFunction = computed(() => {
     editMode = !editMode;
-
 });
 
 </script>
@@ -342,7 +368,7 @@ const editButtonFunction = computed(() => {
             </div>
         </div>
 
-        <div v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris" class="py-8">
+        <div v-if="isAdmin || isLid" class="py-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md uppercase font-semibold">Aanmeldstatus</h2>
@@ -352,14 +378,15 @@ const editButtonFunction = computed(() => {
                     <p v-if="isUserSignedUp" class="mb-4">Je bent momenteel <strong>aangemeld</strong> voor deze aanvraag.</p>
                     <p v-else class="mb-4">Je bent momenteel <strong>niet aangemeld</strong> voor deze aanvraag.</p>
 
-                    <p v-if="!canSignup" class="mb-4">Deze aanvraag zit momenteel vol. Het is dus niet meer mogelijk om je hiervoor aan te melden. Neem bij vragen hierover even contact op met een coördinator.</p>
+                    <p v-if="!canSignup" class="mb-4"><strong>Let op: </strong> Voor deze aanvraag zijn er <strong>{{props.lotusRequest.amount_lotus}}</strong> lotussen nodig. Momenteel zijn er <strong>{{props.lotusRequest.filled_spots}}</strong> aanmeldingen. De coordinator bepaalt wie er uiteindelijk mogen spelen. </p>
 
                     <!-- Knoppen voor aanmelden/afmelden -->
-                    <button v-if="!isUserSignedUp && canSignup" @click="signup" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 mr-4">
+                    <button v-if="!isUserSignedUp " @click="signup" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 mr-4">
                         Aanmelden
                     </button>
 
-                    <p v-if="!canUnregister">Afmelden niet meer mogelijk, dit moet minimaal 14 dagen van te voren. Toch afmelden, neem contact op met de coördinator.</p>
+
+                    <p v-if="!canUnregister && isUserSignedUp">Afmelden niet meer mogelijk, dit moet minimaal 2 dagen van te voren. Toch afmelden, neem contact op met de coördinator.</p>
                     <button
                         v-if="isUserSignedUp"
                         :disabled="!canUnregister"
@@ -372,6 +399,24 @@ const editButtonFunction = computed(() => {
         </div>
 
         <div v-if="isAdmin || isCoordinator" class="pb-8">
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
+                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                    <h2 class="mb-2 text-md uppercase font-semibold">Aanvraag {{ lotusRequest.is_closed ? 'heropenen' : 'sluiten' }}</h2>
+                    <hr class="mb-4">
+                    <!-- Sluiten/Heropenen Knop -->
+                    <p v-if="lotusRequest.is_closed" class="mb-4">Klik hieronder om de aanvraag weer te openen.</p>
+                    <p v-if="!lotusRequest.is_closed" class="mb-4">Klik hieronder om de aanvraag te sluiten. <br>Wanneer je de aanvraag sluit kunnen er geen leden meer aanmelden voor de aanvraag. Ook kan de klant geen aanpassingen meer doorvoeren. </p>
+
+                    <button @click="toggleClosedStatus"
+                            class="bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
+                        {{ lotusRequest.is_closed ? 'Heropenen' : 'Sluiten' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <div v-if="(isAdmin || isCoordinator) && !lotusRequest.is_closed" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md uppercase font-semibold">Aanvraag goedkeuren/afwijzen</h2>
@@ -398,10 +443,12 @@ const editButtonFunction = computed(() => {
             </div>
         </div>
 
+
+
         <form @submit.prevent="updateLotusRequest">
-        <div v-if="isAdmin || isCoordinator || isKlant" class="pb-8" :class="{ 'pt-8': isKlant}" >
+        <div v-if="(isAdmin || isCoordinator || isKlant) && !lotusRequest.is_closed" class="pb-8" :class="{ 'pt-8': isKlant}" >
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg" :class="{'bg-amber-50': editMode }">
+                <div class="p-4 sm:p-8  shadow sm:rounded-lg" :class="{'bg-amber-50': editMode, 'bg-white': !editMode }">
                     <h2 class="mb-2 text-md uppercase font-semibold">Aanvraag bewerken</h2>
                     <hr class="mb-4">
                     <div v-if="!canEdit && isKlant" class="">
@@ -427,7 +474,7 @@ const editButtonFunction = computed(() => {
 
         <div class="pb-8" >
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
-                <div :class="{'bg-amber-50': editMode }" class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div :class="{'bg-amber-50': editMode, 'bg-white': !editMode }" class="p-4 sm:p-8  shadow sm:rounded-lg">
                     <h2 class="mb-2 text-md uppercase font-semibold">Gegevens aanvraag</h2>
                     <hr class="mb-4">
                     <!-- Naam aanvraag -->
@@ -459,7 +506,7 @@ const editButtonFunction = computed(() => {
 
         <div class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg" :class="{'bg-amber-50': editMode }">
+                <div class="p-4 sm:p-8  shadow sm:rounded-lg" :class="{'bg-amber-50': editMode, 'bg-white': !editMode }">
                     <h2 class="mb-2 text-md uppercase font-semibold">Datum, tijd en locatie</h2>
                     <hr class="mb-4">
                     <!-- Begindatum en tijd / Einddatum en tijd -->
@@ -499,14 +546,14 @@ const editButtonFunction = computed(() => {
                         </div>
                     </div>
 
-                    <a :href="googleMapsLink">Open in maps</a>
+                    <a class="mt-4 inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150" :href="googleMapsLink">Open in maps</a>
                 </div>
             </div>
         </div>
 
         <div class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg" :class="{'bg-amber-50': editMode }">
+                <div class="p-4 sm:p-8  shadow sm:rounded-lg" :class="{'bg-amber-50': editMode, 'bg-white': !editMode }">
                     <h2 class="mb-2 text-md uppercase font-semibold">Contactgegevens aanvraag</h2>
                     <hr class="mb-4">
 
@@ -550,18 +597,18 @@ const editButtonFunction = computed(() => {
                                 <div v-if="user.pivot" class="text-gray-600 text-sm mt-2 space-y-1">
                                     <p v-if="!isKlant"><strong>Gespeelde tijd:</strong> {{ user.pivot.user_played_time ?? 'Geen gegevens' }} minuten</p>
                                     <p v-if="!isKlant"><strong>Gereden kilometers:</strong> {{ user.pivot.user_amount_km ?? 'Geen gegevens' }} km</p>
-                                    <p v-if="isAdmin || isSecretaris"><strong>Onkosten:</strong>€ {{ user.pivot.user_expenses ?? 'Geen feedback' }}</p>
+                                    <p v-if="isAdmin || isSecretaris"><strong>Onkosten:</strong>€ {{ user.pivot.user_expenses ?? ' Geen onkosten ingevuld' }}</p>
                                     <p v-if="!isKlant"><strong>Feedback:</strong> {{ user.pivot.user_feedback ?? 'Geen feedback' }}</p>
                                 </div>
                             </div>
-                            <button v-if="isAdmin || isCoordinator" @click="confirmRemoveUser(user.id, user.name)"
+                            <button v-if="(isAdmin || isCoordinator) && !lotusRequest.is_closed" @click="confirmRemoveUser(user.id, user.name)"
                                     class="ml-auto rounded-md self-baseline">
                                 <i class="fa-regular fa-trash-can cursor-pointer mt-1 text-red-600 hover:text-red-700 "></i>
                             </button>
                         </li>
                     </ul>
 
-                    <div class="my-4" v-if="isAdmin || isCoordinator">
+                    <div class="my-4" v-if="(isAdmin || isCoordinator) && !lotusRequest.is_closed">
                         <h2 class="mb-2 text-md uppercase font-semibold">Leden toevoegen</h2>
                         <label for="user-select" class="block text-sm font-medium text-gray-700">Selecteer een gebruiker:</label>
                         <select v-model="selectedUser" id="user-select"

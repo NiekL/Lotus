@@ -1,10 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import {Head, usePage} from '@inertiajs/vue3';
 import LotusRequestTable from '@/Components/LotusRequestsTable.vue';
 
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { defineProps } from 'vue';
+import {computed, defineProps} from 'vue';
 
 const props = defineProps({
     lotusRequests: Array, // Definieer de lotusRequests prop
@@ -20,6 +20,11 @@ const formatTime = (timeString) => {
 
     return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
 };
+
+const page = usePage();
+const userRoles = computed(() => page.props.auth.user?.roles || []);
+const isCoordinator = computed(() => userRoles.value.includes("coordinator"));
+
 
 </script>
 
@@ -40,7 +45,7 @@ const formatTime = (timeString) => {
                     </div>
                 </div>
                 <!-- Gebruik het LotusRequestTable component -->
-                <LotusRequestTable :lotusRequests="props.lotusRequests" tableTitle="Beschikbare aanvragen" />
+                <LotusRequestTable :lotusRequests="props.lotusRequests" :tableTitle="isCoordinator ? 'Beschikbare aanvragen voor leden' : 'Beschikbare aanvragen'" />
             </div>
         </div>
 

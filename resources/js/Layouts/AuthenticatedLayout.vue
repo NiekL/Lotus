@@ -142,7 +142,7 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                         </NavLink>
 
                         <NavLink
-                            v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris"
+                            v-if="isAdmin || isLid"
                             :href="route('lotus-requests.mylotusrequests')"
                             :active="route().current('lotus-requests.mylotusrequests')"
                         >

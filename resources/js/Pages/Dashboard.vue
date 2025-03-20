@@ -100,7 +100,7 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
             </div>
         </div>
 
-        <div v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris" class="pb-8">
+        <div v-if="isAdmin || isLid" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <UserLotusRequestsTable :activeUserLotusRequests="props.activeUserLotusRequests" tableTitle="Mijn aangemelde aanvragen" />
             </div>
@@ -108,7 +108,7 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
 
         <div v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
-                <LotusRequestsTable :lotusRequests="props.lotusRequests" tableTitle="Beschikbare aanvragen" />
+                <LotusRequestsTable :lotusRequests="props.lotusRequests" :tableTitle="isCoordinator ? 'Beschikbare aanvragen voor leden' : 'Beschikbare aanvragen'"/>
             </div>
         </div>
 

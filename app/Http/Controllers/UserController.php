@@ -54,8 +54,8 @@ class UserController extends Controller
 
     public function getNonCustomers()
     {
-        $nonCustomers = User::whereDoesntHave('roles', function ($query) {
-            $query->where('role_id', 3);
+        $nonCustomers = User::whereHas('roles', function ($query) {
+            $query->where('role_id', 4);
         })->get(['id', 'name', 'email'])->sortBy('name');
 
         return response()->json(['nonCustomers' => $nonCustomers]);

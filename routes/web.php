@@ -96,6 +96,10 @@ Route::post('/lotus-requests/decline/{id}', [LotusRequestController::class, 'dec
 Route::post('/lotus-requests/accept/{id}', [LotusRequestController::class, 'acceptRequest'])->name('lotus-requests.accept');
 Route::post('/lotus-requests/decline/{id}', [LotusRequestController::class, 'declineRequest'])->name('lotus-requests.decline');
 
+//Als coordinator request sluiten
+Route::post('/lotus-requests/toggle-closed/{id}', [LotusRequestController::class, 'toggleClosedStatus'])->name('lotus-requests.toggle-closed');
+
+
 
 //Gebruikers aanmelden voor aanvraag
 Route::post('/lotus-requests/{id}/signup', [LotusRequestController::class, 'signup'])

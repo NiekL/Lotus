@@ -28,7 +28,8 @@ class LotusRequest extends Model
         'contact_phone',
         'contact_email',
         'filled_spots',
-        'status'
+        'status',
+        'is_closed'
     ];
 
     // Optionally, you can also specify which attributes should be hidden from JSON responses
@@ -40,7 +41,7 @@ class LotusRequest extends Model
     protected $casts = [
         'start_date_time' => 'datetime',
         'end_date_time' => 'datetime',
-        // Other attribute casts
+        'is_closed' => 'boolean',
     ];
 
     public function users()

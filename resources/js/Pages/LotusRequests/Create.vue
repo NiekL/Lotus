@@ -86,6 +86,20 @@ const submit = () => {
         }
     });
 };
+
+//Tijd in kwartieren
+const correctTime = (field) => {
+    if (!form[field]) return;
+
+    const [hours, minutes] = form[field].split(":").map(Number);
+    const roundedMinutes = Math.round(minutes / 15) * 15; // Ronden naar dichtstbijzijnde 15 minuten
+
+    // Zorgt ervoor dat het correct blijft in de 24-uurs tijdsindeling
+    const correctedHours = roundedMinutes === 60 ? (hours + 1) % 24 : hours;
+    const correctedMinutes = roundedMinutes === 60 ? 0 : roundedMinutes;
+
+    form[field] = `${String(correctedHours).padStart(2, "0")}:${String(correctedMinutes).padStart(2, "0")}`;
+};
 </script>
 
 <template>
@@ -156,22 +170,24 @@ const submit = () => {
                                     />
                                 </div>
                                 <div class="w-full lg:w-1/3 inline-block">
-                                <InputLabel for="arrival_time" value="Starttijd" />
+                                <InputLabel for="arrival_time" value="Starttijd (wordt afgerond naar kwartieren)" />
                                 <TextInput
                                     id="arrival_time"
                                     type="time"
                                     class="mt-1 block w-full"
                                     v-model="form.arrival_time"
+                                    @blur="correctTime('arrival_time')"
                                 />
                                 </div>
 
                                 <div class="w-full lg:w-1/3 inline-block">
-                                    <InputLabel for="end_time" value="Eindtijd" />
+                                    <InputLabel for="end_time" value="Eindtijd (wordt afgerond naar kwartieren)" />
                                     <TextInput
                                         id="end_time"
                                         type="time"
                                         class="mt-1 block w-full"
                                         v-model="form.end_time"
+                                        @blur="correctTime('end_time')"
                                     />
                                 </div>
                             </div>

@@ -243,15 +243,27 @@ class LotusRequestController extends Controller
         return redirect()->route('lotus-requests.acceptlotusrequests')->with('success', 'Aanvraag afgewezen.');
     }
 
+    public function toggleClosedStatus($id)
+    {
+        $lotusRequest = LotusRequest::findOrFail($id);
+        $lotusRequest->update(['is_closed' => !$lotusRequest->is_closed]);
+
+        return response()->json([
+            'message' => 'Status gewijzigd.',
+            'is_closed' => $lotusRequest->is_closed
+        ]);
+    }
+
+
     public function signup(Request $request, $id)
     {
         $user = auth()->user(); // Verkrijg de huidige ingelogde gebruiker
         $lotusRequest = LotusRequest::findOrFail($id);
 
         // Check if filled_spots is greater than or equal to amount_lotus
-        if ($lotusRequest->filled_spots >= $lotusRequest->amount_lotus) {
-            return response()->json(['message' => 'Aanmelden mislukt. De aanvraag zit vol.'], 400);
-        }
+//        if ($lotusRequest->filled_spots >= $lotusRequest->amount_lotus) {
+//            return response()->json(['message' => 'Aanmelden mislukt. De aanvraag zit vol.'], 400);
+//        }
 
         // Controleer of de gebruiker zich al heeft aangemeld
         if ($lotusRequest->users()->where('user_id', $user->id)->exists()) {
@@ -282,9 +294,9 @@ class LotusRequestController extends Controller
         $lotusRequest = LotusRequest::findOrFail($request->lotus_request_id);
         $user = User::findOrFail($userId);
 
-        if ($lotusRequest->filled_spots >= $lotusRequest->amount_lotus) {
-            return response()->json(['message' => 'Aanmelden mislukt. De aanvraag zit vol.', 'status' => 'error'], 400);
-        }
+//        if ($lotusRequest->filled_spots >= $lotusRequest->amount_lotus) {
+//            return response()->json(['message' => 'Aanmelden mislukt. De aanvraag zit vol.', 'status' => 'error'], 400);
+//        }
 
         if ($lotusRequest->users()->where('user_id', $user->id)->exists()) {
             return response()->json(['message' => 'Aanmelden mislukt. Deze gebruiker is al aangemeld.', 'status' => 'error'], 400);
