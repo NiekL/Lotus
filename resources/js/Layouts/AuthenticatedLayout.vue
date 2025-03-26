@@ -5,6 +5,7 @@ import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
 import NavLink from "@/Components/NavLink.vue";
+import VersionComponent from "@/Components/VersionComponent.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import { usePage, Link } from "@inertiajs/vue3";
 
@@ -237,6 +238,7 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                 >
                     <main>
                         <slot />
+                        <VersionComponent />
                     </main>
                 </div>
             </div>
