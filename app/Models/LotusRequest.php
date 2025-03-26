@@ -18,6 +18,7 @@ class LotusRequest extends Model
         'end_time',
         'amount_lotus',
         'payment_mark',
+        'payment_mark_customer',
         'rate_group',
         'details',
         'city',

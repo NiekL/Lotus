@@ -21,6 +21,7 @@ const form = useForm({
     end_time: '',
     amount_lotus: 1,
     payment_mark: '',
+    payment_mark_customer: '',
     rate_group: '',
     details: '',
     city: '',
@@ -205,12 +206,12 @@ const correctTime = (field) => {
                                 />
                                 </div>
                                 <div class="w-full lg:w-1/2 inline-block">
-                                    <InputLabel for="payment_mark" value="Betalingskenmerk (Met echte database goed gegenereerd)" />
+                                    <InputLabel for="payment_mark_customer" value="Eigen factuurnummer (Optioneel, voor als u een eigen factuurnummer wil toevoegen)" />
                                     <TextInput
-                                        id="payment_mark"
+                                        id="payment_mark_customer"
                                         type="text"
                                         class="mt-1 block w-full"
-                                        v-model="form.payment_mark"
+                                        v-model="form.payment_mark_customer"
                                     />
                                 </div>
 

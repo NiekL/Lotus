@@ -23,6 +23,7 @@ class LotusRequestController extends Controller
             'end_time' => 'nullable|date_format:H:i',
             'amount_lotus' => 'required|integer',
             'payment_mark' => 'nullable|string',
+            'payment_mark_customer' => 'nullable|string',
             'rate_group' => 'required|integer',
             'details' => 'nullable|string',
             'city' => 'required|string',

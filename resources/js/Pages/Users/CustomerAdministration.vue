@@ -84,10 +84,10 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
         <div v-if="isAdmin || isCoordinator || isSecretaris" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <h2 class="mb-2 text-md font-semibold uppercase">Nieuwe klant aanmaken</h2>
+                    <h2 class="mb-2 text-md font-semibold uppercase">Nieuwe gebruiker aanmaken</h2>
                     <hr class="mb-4">
                     <a :href="route('users.adduser')" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                        <i class="fa-solid fa-plus"></i> Voeg nieuwe klant toe
+                        <i class="fa-solid fa-plus"></i> Voeg nieuwe gebruiker toe
                     </a>
 
                 </div>

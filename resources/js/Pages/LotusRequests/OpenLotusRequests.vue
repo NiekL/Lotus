@@ -16,7 +16,7 @@ const props = defineProps({
 
 const formatTime = (timeString) => {
     // Create a Date object using a base date (e.g., today's date) and the time string
-    const date = new Date(`1970-01-01T${timeString}Z`); // Use UTC for correct parsing
+    const date = new Date(`1970-01-01T${timeString}`); // Use UTC for correct parsing
 
     return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
 };

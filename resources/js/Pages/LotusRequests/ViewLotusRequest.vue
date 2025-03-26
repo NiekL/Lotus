@@ -1,6 +1,6 @@
 
 <script setup>
-import {onMounted, ref, computed, toRaw} from 'vue';
+import {onMounted, ref, computed, toRaw, watch} from 'vue';
 import axios from 'axios';
 import { defineProps } from 'vue';
 import { Head, usePage } from '@inertiajs/vue3';
@@ -22,7 +22,7 @@ const props = defineProps({
 
 const notification = ref({ message: '', type: '' });
 const formatTime = (timeString) => {
-    const date = new Date(`1970-01-01T${timeString}Z`);
+    const date = new Date(`1970-01-01T${timeString}`);
     return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
 };
 
@@ -260,7 +260,7 @@ const copyAllBillingInfo = async () => {
 
 //Voor user feedback form
 const form = ref({
-    user_played_time: props.userRequestData.user_played_time ?? '',
+    user_played_time: props.userRequestData.user_played_time ?? 0,
     user_amount_km: props.userRequestData.user_amount_km ?? '',
     user_expenses: props.userRequestData.user_expenses ?? '',
     user_feedback: props.userRequestData.user_feedback ?? '',
@@ -302,6 +302,7 @@ const resetEditForm = () => {
 };
 
 const handleSubmit = async () => {
+    console.log("Opgeslagen tijd:", form.value.user_played_time);
     try {
         await axios.post(`/lotus-requests/${props.lotusRequest.id}/submit-details`, form.value);
         notification.value = { message: 'Gegevens succesvol opgeslagen.', type: 'success' };
@@ -347,6 +348,31 @@ const editButtonFunction = computed(() => {
     editMode = !editMode;
 });
 
+//Voor gespeelde uren
+const selectedHours = ref(0);
+const selectedMinutes = ref(0);
+
+// **Bij het laden van de pagina: Zet de opgeslagen minuten om in uren en minuten**
+onMounted(() => {
+    if (form.value.user_played_time > 0) {
+        selectedHours.value = Math.floor(form.value.user_played_time / 60);
+        selectedMinutes.value = form.value.user_played_time % 60;
+    }
+});
+
+//Voor de aangemelde gebruikers
+function displayMinToNice(minutes){
+    var pivotHours = Math.floor(minutes / 60);
+    var pivotMinutes = minutes % 60;
+
+    return pivotHours + " uur en " + pivotMinutes + " minuten";
+}
+
+watch([selectedHours, selectedMinutes], () => {
+    // form.value.user_played_time = `${selectedHours.value}.${selectedMinutes.value}`;
+    form.value.user_played_time = selectedHours.value * 60 + selectedMinutes.value;
+});
+
 </script>
 
 <template>
@@ -375,20 +401,26 @@ const editButtonFunction = computed(() => {
                     <hr class="mb-4">
 
                     <!-- Huidige status van aanmelding -->
-                    <p v-if="isUserSignedUp" class="mb-4">Je bent momenteel <strong>aangemeld</strong> voor deze aanvraag.</p>
-                    <p v-else class="mb-4">Je bent momenteel <strong>niet aangemeld</strong> voor deze aanvraag.</p>
+                    <p v-if="isUserSignedUp" class="mb-4">Je bent momenteel <strong class="text-green-600">aangemeld</strong> voor deze aanvraag.</p>
+                    <p v-else class="mb-4">Je bent momenteel <strong class="text-red-600">niet aangemeld</strong> voor deze aanvraag.</p>
 
                     <p v-if="!canSignup" class="mb-4"><strong>Let op: </strong> Voor deze aanvraag zijn er <strong>{{props.lotusRequest.amount_lotus}}</strong> lotussen nodig. Momenteel zijn er <strong>{{props.lotusRequest.filled_spots}}</strong> aanmeldingen. De coordinator bepaalt wie er uiteindelijk mogen spelen. </p>
 
+                    <p v-if="lotusRequest.is_closed" class="mb-4">Deze aanvraag is momenteel <strong>gesloten</strong>. Aan- of afmelden is daarom niet meer mogelijk, voor vragen neem contact op met de coordinator.</p>
+
                     <!-- Knoppen voor aanmelden/afmelden -->
-                    <button v-if="!isUserSignedUp " @click="signup" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 mr-4">
+
+
+
+
+                    <button v-if="!isUserSignedUp && !lotusRequest.is_closed " @click="signup" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 mr-4">
                         Aanmelden
                     </button>
 
 
-                    <p v-if="!canUnregister && isUserSignedUp">Afmelden niet meer mogelijk, dit moet minimaal 2 dagen van te voren. Toch afmelden, neem contact op met de coördinator.</p>
+                    <p v-if="!canUnregister && isUserSignedUp && !lotusRequest.is_closed">Afmelden niet meer mogelijk, dit moet minimaal 2 dagen van te voren. Toch afmelden, neem contact op met de coördinator.</p>
                     <button
-                        v-if="isUserSignedUp"
+                        v-if="isUserSignedUp && !lotusRequest.is_closed"
                         :disabled="!canUnregister"
                         @click="cancelSignup"
                         class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed">
@@ -595,7 +627,7 @@ const editButtonFunction = computed(() => {
 
                                 <!-- Display Pivot Data if available -->
                                 <div v-if="user.pivot" class="text-gray-600 text-sm mt-2 space-y-1">
-                                    <p v-if="!isKlant"><strong>Gespeelde tijd:</strong> {{ user.pivot.user_played_time ?? 'Geen gegevens' }} minuten</p>
+                                    <p v-if="!isKlant"><strong>Gespeelde tijd:</strong>{{displayMinToNice(user.pivot.user_played_time)}}</p>
                                     <p v-if="!isKlant"><strong>Gereden kilometers:</strong> {{ user.pivot.user_amount_km ?? 'Geen gegevens' }} km</p>
                                     <p v-if="isAdmin || isSecretaris"><strong>Onkosten:</strong>€ {{ user.pivot.user_expenses ?? ' Geen onkosten ingevuld' }}</p>
                                     <p v-if="!isKlant"><strong>Feedback:</strong> {{ user.pivot.user_feedback ?? 'Geen feedback' }}</p>
@@ -639,15 +671,29 @@ const editButtonFunction = computed(() => {
 
                     <form @submit.prevent="handleSubmit" class="mt-6 space-y-6">
                         <div>
-                            <InputLabel for="user_played_time" value="Gespeelde tijd (in minuten)" />
+                            <InputLabel for="user_played_time" value="Gespeelde tijd" />
+
+                            <div class="flex gap-2">
+                                <select v-model="selectedHours" class="block w-1/2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option v-for="hour in 24" :key="hour" :value="hour - 1">
+                                        {{ hour - 1 }} uur
+                                    </option>
+                                </select>
+
+                                <select v-model="selectedMinutes" class="block w-1/2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option v-for="minute in [0, 15, 30, 45]" :key="minute" :value="minute">
+                                        {{ minute }} min
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Verborgen input die correct wordt bijgewerkt -->
                             <TextInput
                                 id="user_played_time"
-                                type="text"
-                                class="block w-full"
+                                type="hidden"
                                 v-model="form.user_played_time"
-                                placeholder="Vul aantal minuten in.."
-                                required
                             />
+
                             <InputError class="mt-2" :message="form.errors.user_played_time" />
                         </div>
 
@@ -720,7 +766,7 @@ const editButtonFunction = computed(() => {
                         <!-- Factuurnummer -->
                         <div class="flex gap-6 flex-wrap lg:flex-nowrap mb-4">
                             <div class="w-full lg:w-1/2">
-                                <InputLabel for="payment_mark" value="Factuurnummer" />
+                                <InputLabel for="payment_mark" value="Factuurnummer van Lotus" />
                                 <p class="border p-2 rounded flex justify-between items-center">
                                     <span>{{ lotusRequest.payment_mark }}</span>
                                     <i :class="lastCopied === 'payment_mark' ? 'fa-solid fa-check text-green-700' : 'fa-regular fa-copy'"
@@ -737,6 +783,16 @@ const editButtonFunction = computed(() => {
                                        @click="copyToClipboard(lotusRequest.rate_group, 'rate_group')"></i>
                                 </p>
                             </div>
+                        </div>
+
+                        <!-- Extra factuurnummer voor klant -->
+                        <div v-if="lotusRequest.payment_mark_customer">
+                            <InputLabel for="payment_mark_customer" value="Extra factuurnummer van klant" />
+                            <p class="border p-2 rounded flex justify-between items-center">
+                                <span>{{ lotusRequest.payment_mark_customer }}</span>
+                                <i :class="lastCopied === 'payment_mark' ? 'fa-solid fa-check text-green-700' : 'fa-regular fa-copy'"
+                                   @click="copyToClipboard(lotusRequest.payment_mark_customer, 'payment_mark')"></i>
+                            </p>
                         </div>
 
                         <!-- (Bedrijfs)naam -->

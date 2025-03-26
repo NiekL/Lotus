@@ -10,8 +10,10 @@ console.log(props.newLotusRequests)
 
 // Functie om de tijd te formatteren
 const formatTime = (timeString) => {
-    const date = new Date(`1970-01-01T${timeString}Z`);
+    const date = new Date(`1970-01-01T${timeString}`);
+    console.log(date);
     return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+
 };
 
 

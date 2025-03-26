@@ -8,7 +8,7 @@ const props = defineProps({
 
 // Functie om de tijd te formatteren
 const formatTime = (timeString) => {
-    const date = new Date(`1970-01-01T${timeString}Z`);
+    const date = new Date(`1970-01-01T${timeString}`);
     return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
 };
 </script>
