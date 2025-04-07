@@ -9,6 +9,7 @@ use App\Http\Controllers\LotusRequestController;
 use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
@@ -212,6 +213,15 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.update');
+});
+
+Route::get('/testmail', function () {
+    Mail::raw('Dit is een testmail.', function ($message) {
+        $message->to('niekluttikhof8@gmail.com')
+            ->subject('Testmail vanaf Laravel');
+    });
+
+    return 'Mail verzonden!';
 });
 
 require __DIR__.'/auth.php';
