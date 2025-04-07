@@ -42,9 +42,11 @@ class AppServiceProvider extends ServiceProvider
                 ->action('Stel wachtwoord opnieuw in', $url)
                 ->line('Deze link is geldig gedurende 1 week. Is de link verlopen? Geen probleem, via wachtwoord vergeten kunt u een nieuwe herstelmail aanvragen.')
 //                ->line('Heb je dit niet aangevraagd? Dan hoef je niets te doen.')
-                ->salutation('Met vriendelijke groet, <br>Lotuskring de Blauwvinger')
                 ->line('Werkt de knop niet? Kopieer en plak de onderstaande URL in je browser:')
-                    ->line($url);
+                ->line($url)
+
+                ->salutation('Met vriendelijke groet, Lotuskring de Blauwvinger');
+
         });
     }
 }
