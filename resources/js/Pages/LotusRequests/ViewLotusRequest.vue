@@ -267,7 +267,7 @@ const form = ref({
     errors: {}
 });
 
-const editMode = ref(false);
+let editMode = ref(false);
 const lotusRequestCopy = ref({ ...props.lotusRequest });
 let editMessage;
 
