@@ -41,11 +41,7 @@ const today = computed(() => {
     return now.toISOString().split('T')[0]; // zet datum om naar YYYY-MM-DD formaat
 });
 
-// Generate a random payment mark
-const generatePaymentMark = () => {
-    return Math.floor(10000 + Math.random() * 90000).toString(); // 5-cijferig random getal
-};
-form.payment_mark = generatePaymentMark();
+//TODO
 form.rate_group = '1';
 
 //User Roles

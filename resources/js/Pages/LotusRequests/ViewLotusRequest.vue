@@ -365,7 +365,13 @@ function displayMinToNice(minutes){
     var pivotHours = Math.floor(minutes / 60);
     var pivotMinutes = minutes % 60;
 
-    return pivotHours + " uur en " + pivotMinutes + " minuten";
+    if(pivotHours || pivotMinutes){
+        var output = pivotHours + " uur en " + pivotMinutes + " minuten";
+    } else {
+        var output = "Geen gespeelde tijd ingevoerd"
+    }
+
+    return output;
 }
 
 watch([selectedHours, selectedMinutes], () => {

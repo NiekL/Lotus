@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 use App\Models\User;
+use App\Providers\RequestNumberService;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 use App\Models\LotusRequest;
@@ -14,6 +16,9 @@ class LotusRequestController extends Controller
     //
     public function store(Request $request)
     {
+
+        $requestNumberService = new RequestNumberService;
+        $requestNumber = $requestNumberService->getNextRequestNumber();
         $validated = $request->validate([
             'name' => 'required|string',
             'customer_id' => 'required|integer',
@@ -35,7 +40,10 @@ class LotusRequestController extends Controller
             'contact_email' => 'required|email',
             'filled_spots' => 'integer',
             'status' => 'integer',
+            'request_number' => 'nullable|integer',
         ]);
+
+        $validated['request_number'] = $requestNumber;
 
         LotusRequest::create($validated);
 
@@ -249,11 +257,38 @@ class LotusRequestController extends Controller
         $lotusRequest = LotusRequest::findOrFail($id);
         $lotusRequest->update(['is_closed' => !$lotusRequest->is_closed]);
 
+
+        if($lotusRequest->is_closed){
+            $this->assignRegistrationNumbers($lotusRequest);
+        }
+
         return response()->json([
             'message' => 'Status gewijzigd.',
             'is_closed' => $lotusRequest->is_closed
         ]);
     }
+
+    private function assignRegistrationNumbers(LotusRequest $lotusRequest)
+    {
+        // Vind het huidige hoogste registration_number over alle records
+        $maxNumber = DB::table('lotus_request_user')
+            ->select(DB::raw('MAX(CAST(registration_number AS UNSIGNED)) as max_number'))
+            ->value('max_number');
+
+        $currentNumber = $maxNumber ? intval($maxNumber) : 0;
+
+        // Voor elke gebruiker gekoppeld aan deze lotus request
+        foreach ($lotusRequest->users as $user) {
+            $currentNumber++;
+            $formattedNumber = str_pad($currentNumber, 5, '0', STR_PAD_LEFT);
+
+            // Update de pivot
+            $lotusRequest->users()->updateExistingPivot($user->id, [
+                'registration_number' => $formattedNumber,
+            ]);
+        }
+    }
+
 
 
     public function signup(Request $request, $id)
@@ -273,7 +308,11 @@ class LotusRequestController extends Controller
         }
 
         // Koppel de gebruiker aan de Lotus aanvraag
-        $lotusRequest->users()->attach($user->id);
+        $requestNumberService = new RequestNumberService();
+        $requestNumber = $requestNumberService->getNextRequestNumber();
+        $lotusRequest->users()->attach($user, [
+            'request_number' => $requestNumber,
+        ]);
 
         // Verhoog `filled_spots`
         $lotusRequest->increment('filled_spots');
@@ -304,8 +343,16 @@ class LotusRequestController extends Controller
         }
 
         // Koppel gebruiker aan Lotus aanvraag
-        $lotusRequest->users()->attach($user->id);
+        $requestNumberService = new RequestNumberService();
+        $requestNumber = $requestNumberService->getNextRequestNumber();
+        $lotusRequest->users()->attach($userId, [
+            'request_number' => $requestNumber,
+        ]);
+
+//        $lotusRequest->users()->attach($user->id);
         $lotusRequest->increment('filled_spots');
+
+
 
         return response()->json([
             'message' => 'Succesvol aangemeld!',
@@ -443,7 +490,4 @@ class LotusRequestController extends Controller
 
         return response()->json(['editMessage' => 'Lotus aanvraag succesvol bijgewerkt!', 'lotusRequest' => $lotusRequest]);
     }
-
-
-
 }
