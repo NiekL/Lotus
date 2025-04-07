@@ -40,9 +40,7 @@ class AppServiceProvider extends ServiceProvider
                 ->line('Hiervoor is het nodig dat bestaande klanten een nieuw wachtwoord in moeten stellen.')
                 ->line('Je hebt aangegeven je wachtwoord opnieuw te willen instellen of je bent nog een gebruiker uit het oude systeem.')
                 ->action('Stel wachtwoord opnieuw in', $url)
-                ->line('Deze link is geldig gedurende 1 week. Is de link verlopen? Geen probleem, via wachtwoord vergeten kunt u een nieuwe herstelmail aanvragen.')
 //                ->line('Heb je dit niet aangevraagd? Dan hoef je niets te doen.')
-                ->line('Werkt de knop niet? Kopieer en plak de onderstaande URL in je browser:')
                 ->line($url)
 
                 ->salutation('Met vriendelijke groet, Lotuskring de Blauwvinger');
