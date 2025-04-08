@@ -23,14 +23,14 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 
                     <div class="space-y-2">
                         <a
-                            href="https://lotuszwolle.nl"
+                            href="https://lotuszwolle.nl/wp-content/uploads/2025/04/Handleiding-Lotus-Planner-Klant-V1.1.0.pdf"
                             target="_blank"
                             class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
                         >
                             Handleiding voor Klanten
                         </a><br><br>
                         <a
-                            href="https://lotuszwolle.nl"
+                            href="https://lotuszwolle.nl/wp-content/uploads/2025/04/Handleiding-Lotus-Planner-Lid-V1.1.0.pdf"
                             target="_blank"
                             class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
                         >

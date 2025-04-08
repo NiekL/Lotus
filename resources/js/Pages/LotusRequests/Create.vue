@@ -202,7 +202,7 @@ const correctTime = (field) => {
                                 />
                                 </div>
                                 <div class="w-full lg:w-1/2 inline-block">
-                                    <InputLabel for="payment_mark_customer" value="Eigen factuurnummer (Optioneel, voor als u een eigen factuurnummer wil toevoegen)" />
+                                    <InputLabel for="payment_mark_customer" value="Eigen referentie (Optioneel, voor als u een eigen referentie wil toevoegen)" />
                                     <TextInput
                                         id="payment_mark_customer"
                                         type="text"
