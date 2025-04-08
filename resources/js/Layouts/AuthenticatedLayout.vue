@@ -229,6 +229,16 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                             <i class="fa-solid fa-user-pen"></i>Profiel
                         </NavLink>
 
+                        <hr>
+                        <NavLink
+                            :href="route('logout')"
+                            method="post"
+                            as="button"
+                        >
+                            <i class="fa-solid fa-right-from-bracket"></i>Uitloggen
+                        </NavLink>
+
+
 
 
 
