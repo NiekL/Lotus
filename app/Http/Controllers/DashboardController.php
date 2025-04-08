@@ -25,6 +25,7 @@ class DashboardController extends Controller
 
         $lotusRequests = LotusRequest::where('status', 2)
             ->whereDate('date', '>=', now()->toDateString())
+            ->where('is_closed', 0)
             ->whereNotIn('id', $activeUserLotusRequestIds) // Filtert de aanvragen waar de gebruiker al voor is aangemeld
             ->orderBy('date', 'asc') // Sorteert oplopend op datum
             ->get();
