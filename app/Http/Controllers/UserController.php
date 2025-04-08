@@ -11,6 +11,8 @@ class UserController extends Controller
     {
         $users = User::whereDoesntHave('roles', function ($query) {
             $query->where('role_id', 3);
+        })->whereDoesntHave('roles', function ($query) {
+            $query->where('role_id', 1);
         })
             ->get()
             ->sortBy('name') // Sorteer hier op naam
@@ -50,10 +52,11 @@ class UserController extends Controller
 
     public function getCustomersOnly()
     {
-
         $customers = User::whereHas('roles', function ($query) {
             $query->where('role_id', 3);
-        })->get(['id', 'name', 'email'])->sortBy('name');
+        })
+            ->orderBy('name') // Sort alphabetically by name in the query itself
+            ->get(['id', 'name', 'email']);
 
         return response()->json(['customers' => $customers]);
     }
@@ -62,7 +65,9 @@ class UserController extends Controller
     {
         $nonCustomers = User::whereHas('roles', function ($query) {
             $query->where('role_id', 4);
-        })->get(['id', 'name', 'email'])->sortBy('name');
+        })
+            ->orderBy('name') // Sorteer alfabetisch op naam
+            ->get(['id', 'name', 'email']);
 
         return response()->json(['nonCustomers' => $nonCustomers]);
     }

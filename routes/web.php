@@ -179,6 +179,11 @@ Route::get('/declarationinfo', function () {
     return Inertia::render('DeclarationInfo');
 })->middleware(['auth', 'verified'])->name('declarationinfo');
 
+//Handleidingen
+Route::get('/userguide', function () {
+    return Inertia::render('UserGuide');
+})->middleware(['auth', 'verified'])->name('userguide');
+
 //Factuurgegevens
 Route::get('/profile/invoiceinfo', [ProfileController::class, 'invoiceInfo'])
     ->middleware(['auth', 'verified','role:admin|coordinator|klant|penningmeester|secretaris'])

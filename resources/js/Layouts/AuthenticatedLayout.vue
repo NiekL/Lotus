@@ -195,12 +195,21 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
 
                         <hr v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris">
 
+<!--                        <NavLink-->
+<!--                            v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris"-->
+<!--                            :href="route('declarationinfo')"-->
+<!--                            :active="route().current('declarationinfo')"-->
+<!--                            class="hidden"-->
+<!--                        >-->
+<!--                            <i class="fa-solid fa-credit-card"></i>Declaratie info-->
+<!--                        </NavLink>-->
+
                         <NavLink
-                            v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris"
-                            :href="route('declarationinfo')"
-                            :active="route().current('declarationinfo')"
+                            v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris || isKlant"
+                            :href="route('userguide')"
+                            :active="route().current('userguide')"
                         >
-                            <i class="fa-solid fa-credit-card"></i>Declaratie info
+                            <i class="fa-solid fa-book-open"></i>Handleidingen
                         </NavLink>
 
                         <hr>
