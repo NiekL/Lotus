@@ -8,6 +8,11 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 // Haal leden op van de server via Inertia's usePage hook
 const { customers } = usePage().props;
 
+// Sorteervolgorde en welke kolom je sorteert
+const sortOrder = ref('asc');
+const sortBy = ref('name');
+
+
 //User Roles
 const page = usePage();
 const userRoles = computed(() => page.props.auth.user?.roles || []);
@@ -15,6 +20,31 @@ const userRoles = computed(() => page.props.auth.user?.roles || []);
 const isAdmin = computed(() => userRoles.value.includes("admin"));
 const isCoordinator = computed(() => userRoles.value.includes("coordinator"));
 const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
+
+
+// Sorteer de leden op basis van de naam
+const sortedCustomers = computed(() => {
+    return [...customers].sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+
+        if (sortOrder.value === 'asc') {
+            return aName.localeCompare(bName);
+        } else {
+            return bName.localeCompare(aName);
+        }
+    });
+});
+
+// Functie om de sorteervolgorde en kolom bij te werken
+const sortData = (column) => {
+    if (sortBy.value === column) {
+        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortBy.value = column;
+        sortOrder.value = 'asc'; // Begin altijd met oplopende volgorde
+    }
+};
 </script>
 
 
@@ -46,6 +76,11 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                                 </th>
                                 <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4 sort-button" @click="sortData('name')">
                                     Naam
+                                    <i :class="{
+                                        'fa-solid fa-arrow-down-a-z': sortBy === 'name' && sortOrder === 'asc',
+                                        'fa-solid fa-arrow-down-z-a': sortBy === 'name' && sortOrder === 'desc',
+                                        'fa-solid fa-arrow': sortBy !== 'name'
+                                      }"></i>
                                 </th>
                                 <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                     E-mail
@@ -56,7 +91,7 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="(customer, index) in customers" :key="index" class="odd:bg-white even:bg-gray-50 border-b hover:bg-gray-200">
+                            <tr v-for="(customer, index) in sortedCustomers" :key="index" class="odd:bg-white even:bg-gray-50 border-b hover:bg-gray-200">
                                 <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                     <i class="fa-regular fa-user text-xl self-baseline"></i>
                                 </td>
@@ -67,11 +102,9 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                                     {{ customer.email }}
                                 </td>
                                 <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
-                                    <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
                                         <a :href="route('users.viewmember', customer.id)" class="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 ease-in-out">
                                             <i class="fa-solid fa-arrow-right"></i>
                                         </a>
-                                    </td>
                                 </td>
                             </tr>
                             </tbody>

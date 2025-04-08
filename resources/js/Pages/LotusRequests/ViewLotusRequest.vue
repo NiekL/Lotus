@@ -11,6 +11,7 @@ import TextInput from "@/Components/TextInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import InputError from "@/Components/InputError.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
+import PenningmeesterCopyComponent from "@/Components/LotusRequestComponents/PenningmeesterCopyComponent.vue";
 
 const props = defineProps({
     lotusRequest: Object, // Define the lotusRequest prop
@@ -231,39 +232,14 @@ const copyToClipboard = async (text, fieldId) => {
     }
 };
 
-
-// Kopieer alle factuurgegevens als één string, gescheiden door een komma
-const copyAllBillingInfo = async () => {
-    try {
-        const allBillingData = [
-            props.lotusRequest.payment_mark,
-            props.lotusRequest.rate_group,
-            props.billingInfo.billing_name,
-            props.billingInfo.billing_address,
-            props.billingInfo.billing_zipcode,
-            props.billingInfo.billing_city,
-            props.billingInfo.billing_contactperson,
-            props.billingInfo.billing_phone,
-            props.billingInfo.billing_email
-        ].join(', '); // Maak een string met komma's
-
-        await navigator.clipboard.writeText(allBillingData);
-        lastCopied.value = 'all';
-        setTimeout(() => {
-            lastCopied.value = null;
-        }, 2000);
-    } catch (err) {
-        console.error('Failed to copy all billing info:', err);
-    }
-};
-
-
 //Voor user feedback form
 const form = ref({
     user_played_time: props.userRequestData.user_played_time ?? 0,
     user_amount_km: props.userRequestData.user_amount_km ?? '',
     user_expenses: props.userRequestData.user_expenses ?? '',
     user_feedback: props.userRequestData.user_feedback ?? '',
+    registration_number: props.userRequestData.registration_number ?? '',
+    request_number: props.userRequestData.request_number ?? '',
     errors: {}
 });
 
@@ -435,6 +411,15 @@ watch([selectedHours, selectedMinutes], () => {
                 </div>
             </div>
         </div>
+
+        <div v-if="isAdmin || isPenningmeester" class="pb-8">
+            <PenningmeesterCopyComponent
+                :lotusRequest="lotusRequest"
+                :billingInfo="billingInfo"
+                :signedUpUsers="signedUpUsers"
+            />
+        </div>
+
 
         <div v-if="isAdmin || isCoordinator" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
@@ -870,23 +855,10 @@ watch([selectedHours, selectedMinutes], () => {
                                    @click="copyToClipboard(billingInfo.billing_email, 'billing_email')"></i>
                             </p>
                         </div>
-
-                        <!-- Alle gegevens -->
-                        <button
-                            @click="copyAllBillingInfo"
-                            class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none transition ease-in-out duration-150">
-                            Kopieer alle gegevens&nbsp;
-                            <i :class="lastCopied === 'all' ? 'fa-solid fa-check text-green-700' : 'fa-regular fa-copy'"></i>
-                        </button>
-
                     </div>
                 </div>
             </div>
         </div>
-
-
-
-
     </AuthenticatedLayout>
 </template>
 

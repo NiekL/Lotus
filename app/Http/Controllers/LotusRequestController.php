@@ -95,11 +95,12 @@ class LotusRequestController extends Controller
 
         // Retrieve the Lotus request along with signed-up users and their pivot data
         $lotusRequest = LotusRequest::with(['users' => function($query) {
-            $query->withPivot('user_played_time', 'user_amount_km', 'user_feedback', 'user_expenses');
+            $query->withPivot('user_played_time', 'user_amount_km', 'user_feedback', 'user_expenses', 'registration_number', 'request_number');
         }])->findOrFail($id);
 
         // Retrieve billing info for the logged-in user
         $customer = User::findOrFail($lotusRequest->customer_id); // Find user with ID
+        $customerName = $customer->name;
 
         $billingInfo = $customer->billingInfo()->firstOrCreate([], [
             'billing_name' => '',
@@ -121,7 +122,7 @@ class LotusRequestController extends Controller
         $nonCustomers = $userController->getNonCustomers();
 
         return Inertia::render('LotusRequests/ViewLotusRequest', [
-            'lotusRequest' => $lotusRequest,
+            'lotusRequest' => $lotusRequest->setAttribute('customer_name', $customerName),
             'signedUpUsers' => $lotusRequest->users,  // Users with pivot data
             'billingInfo' => $billingInfo,
             'userRequestData' => [
@@ -129,6 +130,8 @@ class LotusRequestController extends Controller
                 'user_amount_km' => $pivotData->user_amount_km ?? null,
                 'user_feedback' => $pivotData->user_feedback ?? null,
                 'user_expenses' => $pivotData->user_expenses ?? null,
+                'registration_number' => $pivotData->registration_number ?? null,
+                'request_number' => $pivotData->request_number ?? null,
             ],
             'nonCustomers' => $nonCustomers,
         ]);

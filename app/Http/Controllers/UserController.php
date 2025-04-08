@@ -11,13 +11,16 @@ class UserController extends Controller
     {
         $users = User::whereDoesntHave('roles', function ($query) {
             $query->where('role_id', 3);
-        })->get()->map(function($user) {
-            return [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email, // Zorg dat 'place' bestaat in je model of pas dit aan
-            ];
-        })->sortBy('name');
+        })
+            ->get()
+            ->sortBy('name') // Sorteer hier op naam
+            ->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email, // Zorg dat 'place' bestaat in je model of pas dit aan
+                ];
+            });
 
         return Inertia::render('Users/MemberAdministration', [
             'members' => $users
@@ -65,7 +68,7 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::with(['lotusRequests' => function ($query) {
-            $query->withPivot('user_played_time', 'user_amount_km', 'user_feedback'); // Voeg extra velden toe indien nodig
+            $query->withPivot('user_played_time', 'user_amount_km', 'user_feedback', 'registration_number', 'request_number'); // Voeg extra velden toe indien nodig
         }])->findOrFail($id);
 
         if ($user && $user->roles->contains('name', 'klant')){

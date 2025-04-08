@@ -49,7 +49,7 @@ class User extends Authenticatable
     public function lotusRequests()
     {
         return $this->belongsToMany(LotusRequest::class)
-            ->withPivot('user_played_time', 'user_amount_km', 'user_feedback', 'user_expenses')
+            ->withPivot('user_played_time', 'user_amount_km', 'user_feedback', 'user_expenses', 'registration_number', 'request_number')
             ->withTimestamps();
     }
 
