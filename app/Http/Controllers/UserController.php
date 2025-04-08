@@ -23,7 +23,7 @@ class UserController extends Controller
             });
 
         return Inertia::render('Users/MemberAdministration', [
-            'members' => $users
+            'members' => $users->values()->all()
         ]);
     }
 
@@ -32,16 +32,19 @@ class UserController extends Controller
 
         $customers = User::whereHas('roles', function ($query) {
             $query->where('role_id', 3);
-        })->get()->map(function ($user) {
+        })
+        ->get()
+        ->sortBy('name') // Sorteer hier op naam
+        ->map(function($user) {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
-                'email' => $user->email,
+                'email' => $user->email, // Zorg dat 'place' bestaat in je model of pas dit aan
             ];
-        })->sortBy('name');
+        });
 
         return Inertia::render('Users/CustomerAdministration', [
-            'customers' => $customers
+            'customers' => $customers->values()->all()
         ]);
     }
 
