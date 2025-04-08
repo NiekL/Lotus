@@ -6,7 +6,8 @@ import { Head } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 
 // Haal leden op van de server via Inertia's usePage hook
-const { members } = usePage().props;
+const members = computed(() => usePage().props.members || []);
+
 
 // Sorteervolgorde en welke kolom je sorteert
 const sortOrder = ref('asc');
@@ -22,14 +23,14 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
 
 // Sorteer de leden op basis van de naam
 const sortedMembers = computed(() => {
-    return [...members].sort((a, b) => {
-        const aName = a.name.toLowerCase();
-        const bName = b.name.toLowerCase();
+    return members.value.slice().sort((a, b) => {
+        const nameA = a[sortBy.value]?.toLowerCase?.() || '';
+        const nameB = b[sortBy.value]?.toLowerCase?.() || '';
 
         if (sortOrder.value === 'asc') {
-            return aName.localeCompare(bName);
+            return nameA.localeCompare(nameB);
         } else {
-            return bName.localeCompare(aName);
+            return nameB.localeCompare(nameA);
         }
     });
 });
