@@ -224,11 +224,12 @@ class LotusRequestController extends Controller
             ->orderBy('date', 'asc')
             ->get();
         $declinedLotusRequests = LotusRequest::where('status', 3)
-            ->whereDate('date', '>=', now()->toDateString())
+//            ->whereDate('date', '>=', now()->toDateString())
             ->orderBy('date', 'asc')
             ->get();
 
         $expiredLotusRequests = LotusRequest::whereDate('date', '<=', now()->toDateString())
+            ->where('status', '!=', 3)
             ->orderBy('date', 'asc')
             ->get();
 

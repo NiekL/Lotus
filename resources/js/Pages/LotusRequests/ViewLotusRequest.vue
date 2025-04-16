@@ -294,8 +294,9 @@ const handleSubmit = async () => {
 };
 
 const googleMapsLink = computed(() => {
-    const { streetname, housenumber, zipcode, city } = props.lotusRequest;
-    const query = encodeURIComponent(`${streetname} ${housenumber}, ${zipcode} ${city}`);
+
+    const { street_name, house_number, zipcode, city } = props.lotusRequest;
+    const query = encodeURIComponent(`${street_name} ${house_number}, ${zipcode} ${city}`);
     return `https://www.google.com/maps/search/?api=1&query=${query}`;
 });
 
@@ -361,6 +362,34 @@ watch([selectedHours, selectedMinutes], () => {
     <Head title="Aanvraag aanmaken" />
 
     <AuthenticatedLayout>
+<!--        <div class="bg-gray-200 fixed py-4 w-full">-->
+<!--            <div class="mx-auto px-2 sm:px-6 lg:px-8 flex gap-2">-->
+<!--                <div>-->
+<!--                    &lt;!&ndash; Goedkeuren Knop, zichtbaar als status 1 of 3 &ndash;&gt;-->
+<!--                    <button v-if="lotusRequest.status === 1 || lotusRequest.status === 3"-->
+<!--                            @click="acceptRequest"-->
+<!--                            class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">-->
+<!--                        Goedkeuren-->
+<!--                    </button>-->
+
+<!--                    &lt;!&ndash; Afwijzen Knop, zichtbaar als status 1 of 2 &ndash;&gt;-->
+<!--                    <button v-if="lotusRequest.status === 1 || lotusRequest.status === 2"-->
+<!--                            @click="declineRequest"-->
+<!--                            class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">-->
+<!--                        Afwijzen-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--                <div class="border-r-2 border-gray-400"></div>-->
+<!--                <div>-->
+<!--                    <button @click="toggleClosedStatus"-->
+<!--                            class="bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">-->
+<!--                        {{ lotusRequest.is_closed ? 'Heropenen' : 'Sluiten' }}-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--                <div class="border-r-2 border-gray-400"></div>-->
+<!--            </div>-->
+<!--        </div>-->
+
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Aanvraag {{ lotusRequest.name }}</h2>
         </template>
@@ -396,7 +425,7 @@ watch([selectedHours, selectedMinutes], () => {
 
 
                     <button v-if="!isUserSignedUp && !lotusRequest.is_closed " @click="signup" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 mr-4">
-                        Aanmelden
+                        Aanmelden voor opdracht
                     </button>
 
 
@@ -406,7 +435,7 @@ watch([selectedHours, selectedMinutes], () => {
                         :disabled="!canUnregister"
                         @click="cancelSignup"
                         class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                        Afmelden
+                        Afmelden voor opdracht
                     </button>
                 </div>
             </div>
@@ -553,23 +582,27 @@ watch([selectedHours, selectedMinutes], () => {
                     </div>
 
                     <div class="flex gap-6 flex-wrap lg:flex-nowrap">
-                        <div class="w-full lg:w-1/3">
+                        <div class="w-full lg:w-1/4">
                             <InputLabel for="street_name" value="Straatnaam" />
                             <TextInput id="street_name" type="text" v-model="lotusRequestCopy.street_name" class="w-full" :disabled="!editMode" required />
                         </div>
 
-                        <div class="w-full lg:w-1/3">
+                        <div class="w-full lg:w-1/4">
                             <InputLabel for="house_number" value="Huisnummer" />
                             <TextInput id="house_number" type="text" v-model="lotusRequestCopy.house_number" class="w-full" :disabled="!editMode" required />
                         </div>
 
-                        <div class="w-full lg:w-1/3">
+                        <div class="w-full lg:w-1/4">
                             <InputLabel for="zipcode" value="Postcode" />
                             <TextInput id="zipcode" type="text" v-model="lotusRequestCopy.zipcode" class="w-full" :disabled="!editMode" required />
                         </div>
+                        <div class="w-full lg:w-1/4">
+                            <InputLabel for="zipcode" value="Plaats" />
+                            <TextInput id="zipcode" type="text" v-model="lotusRequestCopy.city" class="w-full" :disabled="!editMode" required />
+                        </div>
                     </div>
 
-                    <a class="mt-4 inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150" :href="googleMapsLink">Open in maps</a>
+                    <a class="mt-4 inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150" :href="googleMapsLink" target="_blank">Open in maps</a>
                 </div>
             </div>
         </div>

@@ -29,35 +29,26 @@ const formatTime = (timeString) => {
             </div>
 
             <div v-else class="relative overflow-x-auto">
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+                <!-- Desktop/tablet-weergave -->
+                <table class="hidden lg:table w-full text-sm text-left rtl:text-right text-gray-500">
                     <thead class="text-gray-700 uppercase text-sm bg-sky-200">
                     <tr>
-                        <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Aanvraag</th>
-                        <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Datum</th>
-                        <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Plaats</th>
-                        <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Tijd</th>
-                        <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Aanmeldingen</th>
-                        <th scope="col" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Bekijken</th>
+                        <th class="px-4 py-2">Aanvraag</th>
+                        <th class="px-4 py-2">Datum</th>
+                        <th class="px-4 py-2">Plaats</th>
+                        <th class="px-4 py-2">Tijd</th>
+                        <th class="px-4 py-2">Aanmeldingen</th>
+                        <th class="px-4 py-2">Bekijken</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr v-for="request in activeUserLotusRequests" :key="request.id" class="odd:bg-sky-50 even:bg-sky-100 border-b hover:bg-gray-200">
-                        <th scope="row" class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4 font-medium text-gray-900 whitespace-nowrap">
-                            {{ request.name }}
-                        </th>
-                        <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
-                            {{ new Date(request.date).toLocaleDateString('nl-NL') }}
-                        </td>
-                        <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
-                            {{ request.city }}
-                        </td>
-                        <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
-                            {{ formatTime(request.arrival_time) }} - {{ formatTime(request.end_time) }}
-                        </td>
-                        <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
-                            {{ request.filled_spots}} / <strong>{{ request.amount_lotus }}</strong>
-                        </td>
-                        <td class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">
+                        <td class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">{{ request.name }}</td>
+                        <td class="px-4 py-2">{{ new Date(request.date).toLocaleDateString('nl-NL') }}</td>
+                        <td class="px-4 py-2">{{ request.city }}</td>
+                        <td class="px-4 py-2">{{ formatTime(request.arrival_time) }} - {{ formatTime(request.end_time) }}</td>
+                        <td class="px-4 py-2">{{ request.filled_spots }} / <strong>{{ request.amount_lotus }}</strong></td>
+                        <td class="px-4 py-2">
                             <a :href="route('lotus-requests.viewlotusrequest', { id: request.id })" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out">
                                 <i class="fa-solid fa-arrow-right"></i>
                             </a>
@@ -65,6 +56,24 @@ const formatTime = (timeString) => {
                     </tr>
                     </tbody>
                 </table>
+
+                <!-- Mobiele versie -->
+                <div class="lg:hidden space-y-4">
+                    <div v-for="request in activeUserLotusRequests" :key="request.id" class="p-4 border rounded-lg bg-white shadow-sm">
+                        <div><span class="font-semibold">Aanvraag:</span> {{ request.name }}</div>
+                        <hr class="my-1">
+                        <div><span class="font-semibold">Datum:</span> {{ new Date(request.date).toLocaleDateString('nl-NL') }}</div>
+                        <div><span class="font-semibold">Plaats:</span> {{ request.city }}</div>
+                        <div><span class="font-semibold">Tijd:</span> {{ formatTime(request.arrival_time) }} - {{ formatTime(request.end_time) }}</div>
+                        <div><span class="font-semibold">Aanmeldingen:</span> {{ request.filled_spots }} / <strong>{{ request.amount_lotus }}</strong></div>
+                        <div class="mt-2">
+                            <a :href="route('lotus-requests.viewlotusrequest', { id: request.id })" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 ease-in-out">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
