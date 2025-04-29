@@ -125,7 +125,7 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
 
         <div class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
-                <LotusRequestTable :lotusRequests="lotusRequests" :tableTitle="'Gekoppelde aanvragen van ' + name " />
+                <LotusRequestTable :lotusRequests="lotusRequests" :tableTitle="'Gekoppelde aanvragen van ' + props.member.name " />
             </div>
         </div>
 
