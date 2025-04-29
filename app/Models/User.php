@@ -55,6 +55,7 @@ class User extends Authenticatable
 
     public function billingInfo()
     {
-        return $this->hasOne(BillingInfo::class);
+        return $this->hasOne(BillingInfo::class, 'user_id');
     }
+
 }

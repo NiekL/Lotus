@@ -82,11 +82,18 @@ class LotusRequest extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class)
+            ->withPivot(['user_played_time', 'user_amount_km', 'user_feedback', 'user_expenses', 'registration_number', 'request_number'])
+            ->withTimestamps();
     }
 
     public function canUnregister(): bool
     {
         return $this->date->isAfter(now()->addDays(14));
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
     }
 }

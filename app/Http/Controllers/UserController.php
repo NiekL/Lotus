@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use Illuminate\Http\Request;
 
 use App\Models\LotusRequest;
 use App\Models\User;
@@ -27,6 +28,47 @@ class UserController extends Controller
         return Inertia::render('Users/MemberAdministration', [
             'members' => $users->values()->all()
         ]);
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->back()->with('success', 'Gebruiker bijgewerkt.');
+    }
+
+
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+
+        // 1. Verwijder alle LotusRequests waar deze gebruiker klant is
+        LotusRequest::where('customer_id', $user->id)->delete();
+
+        foreach ($user->lotusRequests as $lotusRequest) {
+            // Verlaag filled_spots maar voorkom negatieve waarden
+            if ($lotusRequest->filled_spots > 0) {
+                $lotusRequest->decrement('filled_spots');
+            }
+        }
+
+        // 2. Ontkoppel gebruiker van alle LotusRequests (pivot tabel)
+        $user->lotusRequests()->detach();
+
+        // 3. Verwijder billing info indien aanwezig
+        if ($user->billingInfo) {
+            $user->billingInfo->delete();
+        }
+
+        // 4. Verwijder gebruiker zelf
+        $user->delete();
+
+        return redirect()->route('dashboard')->with('success', 'Gebruiker verwijderd.');
     }
 
     public function customers()

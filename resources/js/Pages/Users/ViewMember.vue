@@ -1,5 +1,6 @@
 <script setup>
-import { ref, defineProps } from 'vue';
+import { router } from '@inertiajs/vue3'
+import {reactive, ref, defineProps, computed} from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
@@ -15,11 +16,47 @@ const props = defineProps({
     lotusRequests: Array,
 });
 
-// Maak reactieve referenties voor de naam en email
-const name = ref(props.member.name);
-const email = ref(props.member.email);
+const flashMessage = computed(() => usePage().props.flash?.success);
+
+const editMode = ref(false);
+const form = reactive({
+    name: props.member.name,
+    email: props.member.email,
+});
+
+const toggleEdit = () => {
+    if (editMode.value) {
+        updateUser();
+    } else {
+        editMode.value = true;
+    }
+};
+
+const updateUser = () => {
+    router.put(`/users/${props.member.id}`, form, {
+        onSuccess: () => {
+            editMode.value = false;
+        },
+        onError: (errors) => {
+            console.error(errors);
+        }
+    });
+};
+
+const deleteUser = () => {
+    if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
+        router.delete(`/users/${props.member.id}`);
+    }
+};
 
 
+//User Roles
+const page = usePage();
+const userRoles = computed(() => page.props.auth.user?.roles || []);
+
+const isAdmin = computed(() => userRoles.value.includes("admin"));
+const isCoordinator = computed(() => userRoles.value.includes("coordinator"));
+const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
 
 </script>
 
@@ -33,11 +70,15 @@ const email = ref(props.member.email);
         <div class="py-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
 
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div :class="['p-4 sm:p-8 shadow sm:rounded-lg transition-all duration-300', editMode ? 'bg-yellow-50' : 'bg-white']">
                     <h2 class="mb-2 text-md font-semibold uppercase">Account gegevens</h2>
                     <hr class="mb-4">
 
                     <div class="space-y-6">
+
+                        <div v-if="flashMessage" class="mb-4 px-4 py-3 rounded bg-green-100 text-green-800 border border-green-300">
+                            {{ flashMessage }}
+                        </div>
 
                         <div>
                             <InputLabel for="name" value="Naam" />
@@ -45,9 +86,9 @@ const email = ref(props.member.email);
                                 id="name"
                                 type="text"
                                 class="mt-1 block w-full"
-                                autocomplete="name"
-                                disabled
-                                :model-value="name"/>
+                                v-model="form.name"
+                                :disabled="!editMode"
+                            />
                         </div>
                         <div>
                             <InputLabel for="email" value="Email" />
@@ -55,10 +96,26 @@ const email = ref(props.member.email);
                                 id="email"
                                 type="email"
                                 class="mt-1 block w-full"
-                                disabled
-                                autocomplete="username"
-                                :model-value="email"
+                                v-model="form.email"
+                                :disabled="!editMode"
                             />
+                        </div>
+
+                        <div class="flex gap-4 pt-4" v-if="isAdmin || isCoordinator || isSecretaris">
+                            <PrimaryButton @click="toggleEdit">
+                                {{ editMode ? 'Opslaan' : 'Bewerk gebruiker' }}
+                            </PrimaryButton>
+                            <PrimaryButton
+                                v-if="editMode"
+                                class="bg-gray-500 hover:bg-gray-600"
+                                @click="editMode = false"
+                            >
+                                Annuleer bewerken
+                            </PrimaryButton>
+                            <PrimaryButton class="bg-red-600 hover:bg-red-700" @click="deleteUser">
+                                Verwijder gebruiker
+                            </PrimaryButton>
+
                         </div>
                     </div>
 

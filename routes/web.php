@@ -54,6 +54,11 @@ Route::get('/lotus-requests/create', function () {
 
 Route::post('/lotus-requests', [LotusRequestController::class, 'store'])->name('lotus-requests.store');
 
+//Anvraag verwijderen:
+Route::delete('/lotus-requests/{id}', [LotusRequestController::class, 'destroy'])
+    ->middleware(['auth', 'verified', 'role:admin|coordinator'])
+    ->name('lotus-requests.destroy')
+    ->middleware(['auth']);
 
 //Mijn lotus aanvragen
 Route::get('/lotus-requests/mylotusrequests', [LotusRequestController::class, 'showUserRequests'])
@@ -133,6 +138,12 @@ Route::post('/lotus-requests/{id}/submit-details', [LotusRequestController::clas
     ->middleware(['auth', 'verified'])
     ->name('lotus-requests.submitDetails');
 
+//Tijdlijn
+Route::get('/lotus-requests/viewtimeline', [LotusRequestController::class, 'showTimeline'])
+    ->middleware(['auth', 'verified','role:admin|coordinator|penningmeester'])
+    ->name('lotus-requests.viewtimeline');
+
+
 
 //Leden administratie
 //Krijg alle gebruikers
@@ -197,6 +208,15 @@ Route::post('/profile/billing-info', [ProfileController::class, 'saveBillingInfo
 Route::post('/users/adduser', [RegisteredUserController::class, 'storeNewMember'])
     ->middleware(['auth', 'verified'])
     ->name('users.store');
+
+//Gebruiker bewerken/verwijderen
+Route::put('/users/{user}', [UserController::class, 'update'])
+    ->middleware(['auth', 'verified','role:admin|coordinator|secretaris'])
+    ->name('users.update');
+Route::delete('/users/{user}', [UserController::class, 'destroy'])
+    ->middleware(['auth', 'verified','role:admin|coordinator|secretaris'])
+    ->name('users.destroy');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

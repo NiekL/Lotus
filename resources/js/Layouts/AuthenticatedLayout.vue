@@ -175,6 +175,14 @@ const isSecretaris = computed(() => userRoles.value.includes("secretaris"));
                             <i class="fa-solid fa-square-check"></i>Aanvragen goedkeuren
                         </NavLink>
 
+                        <NavLink
+                            v-if="isAdmin || isCoordinator || isPenningmeester"
+                            :href="route('lotus-requests.viewtimeline')"
+                            :active="route().current('lotus-requests.viewtimeline')"
+                        >
+                            <i class="fa-solid fa-hourglass-start"></i>Tijdlijn
+                        </NavLink>
+
                         <hr v-if="isAdmin || isCoordinator || isLid || isPenningmeester || isSecretaris">
 
                         <NavLink

@@ -99,9 +99,6 @@ const copyAllSignedUpUsers = async () => {
                 Kopieër alle leden gegevens&nbsp;
                 <i :class="lastCopied === 'signedUpUsers' ? 'fa-solid fa-check text-green-700' : 'fa-regular fa-copy'"></i>
             </button>
-
-
-
         </div>
     </div>
 </template>

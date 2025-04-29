@@ -12,6 +12,8 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import InputError from "@/Components/InputError.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import PenningmeesterCopyComponent from "@/Components/LotusRequestComponents/PenningmeesterCopyComponent.vue";
+import DeleteLotusRequestButton from '@/Components/LotusRequestComponents/DeleteLotusRequest.vue'
+
 
 const props = defineProps({
     lotusRequest: Object, // Define the lotusRequest prop
@@ -889,6 +891,16 @@ watch([selectedHours, selectedMinutes], () => {
                             </p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="isAdmin || isCoordinator" class="pb-8">
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
+                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                    <h2 class="mb-2 text-md uppercase font-semibold">Aanvraag verwijderen</h2>
+                    <hr class="mb-4">
+                    <p class="mb-4"> Verwijder de Lotus aanvraag door op de onderstaande knop te drukken.</p>
+                    <DeleteLotusRequestButton :request-id="lotusRequest.id" :is-closed="lotusRequest.is_closed" />
                 </div>
             </div>
         </div>

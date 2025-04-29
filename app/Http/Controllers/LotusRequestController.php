@@ -137,6 +137,19 @@ class LotusRequestController extends Controller
         ]);
     }
 
+    public function destroy($id)
+    {
+        $lotusRequest = LotusRequest::findOrFail($id);
+
+        // Verwijder gekoppelde relaties in de pivot-tabel (indien nodig)
+        $lotusRequest->users()->detach();
+
+        // Verwijder de aanvraag zelf
+        $lotusRequest->delete();
+
+        return redirect()->route('dashboard')->with('success', 'Lotus-aanvraag verwijderd.');
+    }
+
     public function showUserRequests($user_id = null)
     {
         // Verkrijg de huidige ingelogde gebruiker
@@ -495,4 +508,30 @@ class LotusRequestController extends Controller
 
         return response()->json(['editMessage' => 'Lotus aanvraag succesvol bijgewerkt!', 'lotusRequest' => $lotusRequest]);
     }
+
+    //Timeline
+    public function showTimeline(Request $request)
+    {
+        // Bepaal maand en jaar (standaard: huidige maand)
+        $month = $request->query('month', now()->format('m'));
+        $year = $request->query('year', now()->format('Y'));
+
+        $lotusRequests = LotusRequest::with([
+            'customer.billingInfo',
+            'users' => function($query) {
+                $query->withPivot('user_played_time', 'user_amount_km', 'user_feedback', 'user_expenses', 'registration_number', 'request_number');
+            }
+        ])
+            ->whereMonth('date', $month)
+            ->whereYear('date', $year)
+            ->orderBy('date', 'asc')
+            ->get();
+
+        return Inertia::render('LotusRequests/ViewTimeline', [
+            'lotusRequests' => $lotusRequests,
+            'selectedMonth' => $month,
+            'selectedYear' => $year,
+        ]);
+    }
+
 }
