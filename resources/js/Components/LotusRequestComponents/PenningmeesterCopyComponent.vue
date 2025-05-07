@@ -7,8 +7,6 @@ const props = defineProps({
     signedUpUsers: Array,
 })
 
-console.log(props.lotusRequest)
-
 const lastCopied = ref(null);
 const copyAllBillingInfo = async () => {
     try {

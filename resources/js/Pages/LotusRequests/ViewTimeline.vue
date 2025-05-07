@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Head, router, Link } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 
@@ -16,6 +16,11 @@ const months = [
     { label: 'Oktober', value: '10' }, { label: 'November', value: '11' }, { label: 'December', value: '12' },
 ]
 
+const currentMonthLabel = computed(() => {
+    const month = months.find(m => m.value === currentMonth.value)
+    return month ? month.label : 'Onbekend'
+})
+
 const currentMonth = ref(props.selectedMonth)
 const currentYear = ref(props.selectedYear)
 const lastCopied = ref(null)
@@ -26,9 +31,7 @@ const updateTimeline = () => {
         year: currentYear.value
     })
 }
-
-
-const copyRequestInfo = async (request) => {
+const copySingleRequestInfo = async (request) => {
     console.log(request)
     try {
         const info = [
@@ -52,23 +55,25 @@ const copyRequestInfo = async (request) => {
     }
 }
 
-const copyUserInfo = async (request) => {
+const copySingleUserInfo = async (request) => {
     try {
         const date = new Date(request.date).toLocaleDateString('nl-NL');
         const info = request.users.map(user => {
             const p = user.pivot ?? {};
-            return `${date}\t${request.arrival_time.slice(0, 5)} - ${request.end_time.slice(0, 5)}\t${[
-                user.name,
+            return [
+                date,
+                `${request.arrival_time.slice(0, 5)} - ${request.end_time.slice(0, 5)}`,
                 p.registration_number ?? '',
+                user.name,
                 p.request_number ?? '',
-                request.customer_name ?? '',
-                request.payment_mark ?? '',
-                request.name,
+                request.customer.name ?? '',
+                request.name ?? '',
+                // request.payment_mark ?? '',
                 (p.user_played_time / 60) ?? '',
                 p.user_amount_km ?? '',
                 p.user_expenses ?? '',
                 p.user_feedback ?? ''
-            ].join('\t')}`;
+            ].join('\t');
         }).join('\n');
 
         await navigator.clipboard.writeText(info);
@@ -78,6 +83,63 @@ const copyUserInfo = async (request) => {
         console.error('Copy failed:', err);
     }
 }
+
+const copyAllRequestInfo = async () => {
+    try {
+        const info = props.lotusRequests.map(request => {
+            return [
+                request.payment_mark,
+                request.rate_group,
+                request.customer.name,
+                request.customer.billing_info?.billing_address,
+                request.customer.billing_info?.billing_zipcode,
+                request.customer.billing_info?.billing_city,
+                request.customer.billing_info?.billing_contactperson,
+                request.customer.billing_info?.billing_phone,
+                request.customer.billing_info?.billing_email,
+                request.request_number
+            ].join('\t');
+        }).join('\n');
+
+        await navigator.clipboard.writeText(info);
+        lastCopied.value = 'all-requests';
+        setTimeout(() => lastCopied.value = null, 2000);
+    } catch (err) {
+        console.error('Copy all request info failed:', err);
+    }
+}
+
+const copyAllUserInfo = async () => {
+    try {
+        const info = props.lotusRequests.flatMap(request => {
+            const date = new Date(request.date).toLocaleDateString('nl-NL');
+            return request.users.map(user => {
+                const p = user.pivot ?? {};
+                return [
+                    date,
+                    `${request.arrival_time.slice(0, 5)} - ${request.end_time.slice(0, 5)}`,
+                    p.registration_number ?? '',
+                    user.name,
+                    p.request_number ?? '',
+                    request.customer.name ?? '',
+                    request.name ?? '',
+                    // request.payment_mark ?? '',
+                    (p.user_played_time / 60) ?? '',
+                    p.user_amount_km ?? '',
+                    p.user_expenses ?? '',
+                    p.user_feedback ?? ''
+                ].join('\t');
+            });
+        }).join('\n');
+
+        await navigator.clipboard.writeText(info);
+        lastCopied.value = 'all-users';
+        setTimeout(() => lastCopied.value = null, 2000);
+    } catch (err) {
+        console.error('Copy all user info failed:', err);
+    }
+}
+
 </script>
 
 <template>
@@ -87,6 +149,9 @@ const copyUserInfo = async (request) => {
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Bekijk tijdlijn</h2>
         </template>
 
+
+
+
         <div class="py-6 px-4">
             <div class="bg-white p-4 rounded shadow mb-4">
                 <div class="flex flex-wrap gap-2 items-center">
@@ -94,6 +159,18 @@ const copyUserInfo = async (request) => {
                         <option v-for="month in months" :key="month.value" :value="month.value">{{ month.label }}</option>
                     </select>
                     <input type="number" v-model="currentYear" @change="updateTimeline" class="border rounded p-2 w-24" min="2000" max="2100" />
+                </div>
+
+                <div class="flex flex-wrap gap-2 my-4">
+                    <button @click="copyAllRequestInfo" class="text-sm bg-blue-100 hover:bg-blue-200 px-2 py-1 rounded">
+                        📋 Kopieer alle aanvraag info van {{ currentMonthLabel }}
+                    </button>
+                    <button @click="copyAllUserInfo" class="text-sm bg-green-100 hover:bg-green-200 px-2 py-1 rounded">
+                        👥 Kopieer alle leden info van {{ currentMonthLabel }}
+                    </button>
+                    <span v-if="lastCopied === 'all-requests' || lastCopied === 'all-users'" class="text-green-600 text-xs self-center">
+        Alles gekopieerd!
+            </span>
                 </div>
             </div>
 
@@ -107,10 +184,10 @@ const copyUserInfo = async (request) => {
                             {{ new Date(request.date).toLocaleDateString('nl-NL') }} - {{ request.name }}
                         </Link>
                         <div class="flex gap-2 mt-2 sm:mt-0 flex-wrap">
-                            <button @click="copyRequestInfo(request)" class="text-sm bg-blue-100 hover:bg-blue-200 px-2 py-1 rounded">
+                            <button @click="copySingleRequestInfo(request)" class="text-sm bg-blue-100 hover:bg-blue-200 px-2 py-1 rounded">
                                 📋 Kopieer aanvraag
                             </button>
-                            <button @click="copyUserInfo(request)" class="text-sm bg-green-100 hover:bg-green-200 px-2 py-1 rounded">
+                            <button @click="copySingleUserInfo(request)" class="text-sm bg-green-100 hover:bg-green-200 px-2 py-1 rounded">
                                 👥 Kopieer leden
                             </button>
                             <span v-if="lastCopied === 'request-' + request.id || lastCopied === 'users-' + request.id" class="text-green-600 text-xs self-center">
