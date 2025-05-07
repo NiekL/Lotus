@@ -177,7 +177,14 @@ const copyAllUserInfo = async () => {
             <div v-if="lotusRequests.length === 0" class="text-gray-600">Geen Lotus-aanvragen gevonden voor deze maand.</div>
 
             <div v-else class="space-y-6">
-                <div v-for="request in lotusRequests" :key="request.id" class="bg-white p-4 rounded shadow border">
+                <div
+                    v-for="request in lotusRequests"
+                    :key="request.id"
+                    :class="[
+                            'p-4 rounded shadow mb-2',
+                            request.is_closed === false ? 'bg-red-50' : 'bg-white'
+                          ]"
+                >
 
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2">
                         <Link :href="route('lotus-requests.viewlotusrequest', { id: request.id })" class="text-lg font-semibold text-red-700 hover:underline">
@@ -197,6 +204,7 @@ const copyAllUserInfo = async () => {
                     </div>
 
                     <p class="">{{ request.customer.name }}</p>
+                    <p class="text-sm text-gray-600">Status: {{ request.is_closed ? 'Gesloten' : 'Open' }}</p>
                     <p class="text-sm text-gray-600">{{ request.city }} – {{ request.arrival_time }} tot {{ request.end_time }}</p>
 <!--                    <p class="text-sm italic mb-2">{{ request.description }}</p>-->
 
