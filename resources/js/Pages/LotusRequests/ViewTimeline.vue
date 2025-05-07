@@ -203,9 +203,9 @@ const copyAllUserInfo = async () => {
                         </div>
                     </div>
 
-                    <p class="">{{ request.customer.name }}</p>
+                    <p class="">Klant: {{ request.customer.name }}</p>
                     <p class="text-sm text-gray-600">Status: {{ request.is_closed ? 'Gesloten' : 'Open' }}</p>
-                    <p class="text-sm text-gray-600">{{ request.city }} – {{ request.arrival_time }} tot {{ request.end_time }}</p>
+                    <p class="text-sm text-gray-600">Locatie: {{ request.city }} – {{ request.arrival_time }} tot {{ request.end_time }}</p>
 <!--                    <p class="text-sm italic mb-2">{{ request.description }}</p>-->
 
                     <div class="overflow-x-auto">
