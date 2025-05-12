@@ -24,9 +24,16 @@ const currentMonthLabel = computed(() => {
 const currentMonth = ref(props.selectedMonth)
 const currentYear = ref(props.selectedYear)
 const lastCopied = ref(null)
+
 const hasOpenRequests = computed(() => {
     return props.lotusRequests.some(request => request.is_closed === false)
-})
+});
+const notifyIfOpenRequests = () => {
+    if (hasOpenRequests.value) {
+        alert('Let op: Niet alle aanvragen zijn gesloten voor de geselecteerde maand. Dit kan betekenen dat niet alle informatie compleet is of dat er voor sommige aanvragen nog geen registratienummer is gegenereerd.');
+    }
+}
+
 
 const updateTimeline = () => {
     router.get(route('lotus-requests.viewtimeline'), {
@@ -35,7 +42,6 @@ const updateTimeline = () => {
     })
 }
 const copySingleRequestInfo = async (request) => {
-    console.log(request)
     try {
         const info = [
             request.payment_mark,
@@ -75,7 +81,7 @@ const copySingleUserInfo = async (request) => {
                 (p.user_played_time / 60).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '0',
                 p.user_amount_km ?? '0',
                 p.user_expenses ?? '0',
-                p.user_feedback ?? '0'
+                p.user_feedback ?? ''
             ].join('\t');
         }).join('\n');
 
@@ -88,6 +94,7 @@ const copySingleUserInfo = async (request) => {
 }
 
 const copyAllRequestInfo = async () => {
+    notifyIfOpenRequests();
     try {
         const info = props.lotusRequests.map(request => {
             return [
@@ -113,6 +120,7 @@ const copyAllRequestInfo = async () => {
 }
 
 const copyAllUserInfo = async () => {
+    notifyIfOpenRequests();
     try {
         const info = props.lotusRequests.flatMap(request => {
             const date = new Date(request.date).toLocaleDateString('nl-NL');
@@ -130,7 +138,7 @@ const copyAllUserInfo = async () => {
                     (p.user_played_time / 60).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '0',
                     p.user_amount_km ?? '0',
                     p.user_expenses ?? '0',
-                    p.user_feedback ?? '0'
+                    p.user_feedback ?? ''
                 ].join('\t');
             });
         }).join('\n');
@@ -178,7 +186,7 @@ const copyAllUserInfo = async () => {
             </div>
 
             <div v-if="hasOpenRequests" class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded mb-4 border border-yellow-300">
-                <p>Let op: Nog niet alle aanvragen zijn gesloten voor de maand {{ currentMonthLabel }}. Dit kan betekenen dat er voor sommige open aanvragen nog geen registratienummer is gegenereerd. De aanvragen die nog niet gesloten zijn hebben een rode achtergrond. </p>
+                <p>Let op: Nog niet alle aanvragen zijn gesloten voor de maand {{ currentMonthLabel }}. Dit kan betekenen dat niet alle informatie compleet is of dat er voor sommige aanvragen nog geen registratienummer is gegenereerd. De aanvragen die nog niet gesloten zijn hebben een rode achtergrond. </p>
             </div>
 
             <div v-if="lotusRequests.length === 0" class="text-gray-600">Geen Lotus-aanvragen gevonden voor deze maand.</div>
