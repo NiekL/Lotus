@@ -24,6 +24,9 @@ const currentMonthLabel = computed(() => {
 const currentMonth = ref(props.selectedMonth)
 const currentYear = ref(props.selectedYear)
 const lastCopied = ref(null)
+const hasOpenRequests = computed(() => {
+    return props.lotusRequests.some(request => request.is_closed === false)
+})
 
 const updateTimeline = () => {
     router.get(route('lotus-requests.viewtimeline'), {
@@ -44,7 +47,7 @@ const copySingleRequestInfo = async (request) => {
             request.customer.billing_info?.billing_contact_person,
             request.customer.billing_info?.billing_contact_phone,
             request.customer.billing_info?.billing_contact_email,
-            request.request_number
+            request.request_number.toString().padStart(5, '0'),
         ].join('\t');
 
         await navigator.clipboard.writeText(info);
@@ -65,14 +68,14 @@ const copySingleUserInfo = async (request) => {
                 `${request.arrival_time.slice(0, 5)} - ${request.end_time.slice(0, 5)}`,
                 p.registration_number ?? '',
                 user.name,
-                p.request_number ?? '',
+                (p.request_number ?? '').toString().padStart(5, '0'),
                 request.customer.name ?? '',
                 request.name ?? '',
                 // request.payment_mark ?? '',
-                (p.user_played_time / 60) ?? '',
-                p.user_amount_km ?? '',
-                p.user_expenses ?? '',
-                p.user_feedback ?? ''
+                (p.user_played_time / 60).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '0',
+                p.user_amount_km ?? '0',
+                p.user_expenses ?? '0',
+                p.user_feedback ?? '0'
             ].join('\t');
         }).join('\n');
 
@@ -97,7 +100,7 @@ const copyAllRequestInfo = async () => {
                 request.customer.billing_info?.billing_contactperson,
                 request.customer.billing_info?.billing_phone,
                 request.customer.billing_info?.billing_email,
-                request.request_number
+                request.request_number.toString().padStart(5, '0'),
             ].join('\t');
         }).join('\n');
 
@@ -120,14 +123,14 @@ const copyAllUserInfo = async () => {
                     `${request.arrival_time.slice(0, 5)} - ${request.end_time.slice(0, 5)}`,
                     p.registration_number ?? '',
                     user.name,
-                    p.request_number ?? '',
+                    (p.request_number ?? '').toString().padStart(5, '0'),
                     request.customer.name ?? '',
                     request.name ?? '',
                     // request.payment_mark ?? '',
-                    (p.user_played_time / 60) ?? '',
-                    p.user_amount_km ?? '',
-                    p.user_expenses ?? '',
-                    p.user_feedback ?? ''
+                    (p.user_played_time / 60).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '0',
+                    p.user_amount_km ?? '0',
+                    p.user_expenses ?? '0',
+                    p.user_feedback ?? '0'
                 ].join('\t');
             });
         }).join('\n');
@@ -172,6 +175,10 @@ const copyAllUserInfo = async () => {
         Alles gekopieerd!
             </span>
                 </div>
+            </div>
+
+            <div v-if="hasOpenRequests" class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded mb-4 border border-yellow-300">
+                <p>Let op: Nog niet alle aanvragen zijn gesloten voor de maand {{ currentMonthLabel }}. Dit kan betekenen dat er voor sommige open aanvragen nog geen registratienummer is gegenereerd. De aanvragen die nog niet gesloten zijn hebben een rode achtergrond. </p>
             </div>
 
             <div v-if="lotusRequests.length === 0" class="text-gray-600">Geen Lotus-aanvragen gevonden voor deze maand.</div>
