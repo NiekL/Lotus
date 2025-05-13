@@ -80,8 +80,10 @@ const copySingleUserInfo = async (request) => {
                 // request.payment_mark ?? '',
                 (p.user_played_time / 60).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '0',
                 p.user_amount_km ?? '0',
-                p.user_expenses ?? '0',
-                p.user_feedback ?? ''
+                (p.user_expenses ?? 0).toLocaleString('nl-NL', {minimumFractionDigits: 2, maximumFractionDigits: 2}) ?? '0,00',
+                p.user_feedback ?? '',
+                request.payment_mark ?? '',
+                request.payment_mark_customer ?? 'nvt',
             ].join('\t');
         }).join('\n');
 
@@ -120,6 +122,7 @@ const copyAllRequestInfo = async () => {
 }
 
 const copyAllUserInfo = async () => {
+    console.log(props.lotusRequests);
     notifyIfOpenRequests();
     try {
         const info = props.lotusRequests.flatMap(request => {
@@ -137,8 +140,10 @@ const copyAllUserInfo = async () => {
                     // request.payment_mark ?? '',
                     (p.user_played_time / 60).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '0',
                     p.user_amount_km ?? '0',
-                    p.user_expenses ?? '0',
-                    p.user_feedback ?? ''
+                    (p.user_expenses ?? 0).toLocaleString('nl-NL', {minimumFractionDigits: 2, maximumFractionDigits: 2}) ?? '0,00',
+                    p.user_feedback ?? '',
+                    request.payment_mark ?? '',
+                    request.payment_mark_customer ?? 'nvt',
                 ].join('\t');
             });
         }).join('\n');
