@@ -72,18 +72,18 @@ const copySingleUserInfo = async (request) => {
             return [
                 date,
                 `${request.arrival_time.slice(0, 5)} - ${request.end_time.slice(0, 5)}`,
-                p.registration_number ?? '',
-                user.name,
-                (p.request_number ?? '').toString().padStart(5, '0'),
-                request.customer.name ?? '',
-                request.name ?? '',
+                p.registration_number ?? '-',
+                user.name ?? '-',
+                (p.request_number).toString().padStart(5, '0') ?? '-',
+                request.customer.name ?? '-',
+                request.name ?? '-',
                 // request.payment_mark ?? '',
                 (p.user_played_time / 60).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '0',
                 p.user_amount_km ?? '0',
                 (p.user_expenses ?? 0).toLocaleString('nl-NL', {minimumFractionDigits: 2, maximumFractionDigits: 2}) ?? '0,00',
-                p.user_feedback ?? '',
-                request.payment_mark ?? '',
-                request.payment_mark_customer ?? 'nvt',
+                p.user_feedback ?? '-',
+                request.payment_mark ?? '-',
+                request.payment_mark_customer ?? 'zie aanvraagcode',
             ].join('\t');
         }).join('\n');
 
@@ -132,18 +132,18 @@ const copyAllUserInfo = async () => {
                 return [
                     date,
                     `${request.arrival_time.slice(0, 5)} - ${request.end_time.slice(0, 5)}`,
-                    p.registration_number ?? '',
-                    user.name,
-                    (p.request_number ?? '').toString().padStart(5, '0'),
-                    request.customer.name ?? '',
-                    request.name ?? '',
+                    p.registration_number ?? '-',
+                    user.name ?? '-',
+                    (p.request_number).toString().padStart(5, '0') ?? '-',
+                    request.customer.name ?? '-',
+                    request.name ?? '-',
                     // request.payment_mark ?? '',
                     (p.user_played_time / 60).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '0',
                     p.user_amount_km ?? '0',
                     (p.user_expenses ?? 0).toLocaleString('nl-NL', {minimumFractionDigits: 2, maximumFractionDigits: 2}) ?? '0,00',
-                    p.user_feedback ?? '',
-                    request.payment_mark ?? '',
-                    request.payment_mark_customer ?? 'nvt',
+                    p.user_feedback ?? '-',
+                    request.payment_mark ?? '-',
+                    request.payment_mark_customer ?? 'zie aanvraagcode',
                 ].join('\t');
             });
         }).join('\n');
