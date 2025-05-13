@@ -72,7 +72,7 @@ const copySingleUserInfo = async (request) => {
             return [
                 date,
                 `${request.arrival_time.slice(0, 5)} - ${request.end_time.slice(0, 5)}`,
-                p.registration_number ?? '-',
+                p.registration_number ?? '0',
                 user.name ?? '-',
                 (p.request_number).toString().padStart(5, '0') ?? '-',
                 request.customer.name ?? '-',
@@ -132,7 +132,7 @@ const copyAllUserInfo = async () => {
                 return [
                     date,
                     `${request.arrival_time.slice(0, 5)} - ${request.end_time.slice(0, 5)}`,
-                    p.registration_number ?? '-',
+                    p.registration_number ?? '0',
                     user.name ?? '-',
                     (p.request_number).toString().padStart(5, '0') ?? '-',
                     request.customer.name ?? '-',
