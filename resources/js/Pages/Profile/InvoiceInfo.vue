@@ -84,7 +84,7 @@ const submit = () => {
                         </div>
 
                         <div>
-                            <InputLabel for="billing_city" value="Factuur plaats" />
+                            <InputLabel for="billing_city" value="Factuur plaatsnaam" />
 
                             <TextInput
                                 id="billing_city"

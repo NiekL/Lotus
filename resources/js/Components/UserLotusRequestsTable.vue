@@ -35,7 +35,7 @@ const formatTime = (timeString) => {
                     <tr>
                         <th class="px-4 py-2">Aanvraag</th>
                         <th class="px-4 py-2">Datum</th>
-                        <th class="px-4 py-2">Plaats</th>
+                        <th class="px-4 py-2">Plaatsnaam</th>
                         <th class="px-4 py-2">Tijd</th>
                         <th class="px-4 py-2">Aanmeldingen</th>
                         <th class="px-4 py-2">Bekijken</th>
@@ -63,7 +63,7 @@ const formatTime = (timeString) => {
                         <div><span class="font-semibold">Aanvraag:</span> {{ request.name }}</div>
                         <hr class="my-1">
                         <div><span class="font-semibold">Datum:</span> {{ new Date(request.date).toLocaleDateString('nl-NL') }}</div>
-                        <div><span class="font-semibold">Plaats:</span> {{ request.city }}</div>
+                        <div><span class="font-semibold">Plaatsnaam:</span> {{ request.city }}</div>
                         <div><span class="font-semibold">Tijd:</span> {{ formatTime(request.arrival_time) }} - {{ formatTime(request.end_time) }}</div>
                         <div><span class="font-semibold">Aanmeldingen:</span> {{ request.filled_spots }} / <strong>{{ request.amount_lotus }}</strong></div>
                         <div class="mt-2">

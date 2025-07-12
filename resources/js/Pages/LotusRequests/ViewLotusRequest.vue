@@ -599,8 +599,8 @@ watch([selectedHours, selectedMinutes], () => {
                             <TextInput id="zipcode" type="text" v-model="lotusRequestCopy.zipcode" class="w-full" :disabled="!editMode" required />
                         </div>
                         <div class="w-full lg:w-1/4">
-                            <InputLabel for="zipcode" value="Plaats" />
-                            <TextInput id="zipcode" type="text" v-model="lotusRequestCopy.city" class="w-full" :disabled="!editMode" required />
+                            <InputLabel for="city" value="Plaats" />
+                            <TextInput id="city" type="text" v-model="lotusRequestCopy.city" class="w-full" :disabled="!editMode" required />
                         </div>
                     </div>
 

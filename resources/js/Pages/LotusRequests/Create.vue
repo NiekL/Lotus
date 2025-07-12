@@ -244,7 +244,7 @@ const correctTime = (field) => {
                             <hr class="mb-2">
 
                                 <div>
-                                    <InputLabel for="city" value="Plaats speellocatie" />
+                                    <InputLabel for="city" value="Plaatsnaam speellocatie" />
                                     <TextInput
                                         id="city"
                                         type="text"

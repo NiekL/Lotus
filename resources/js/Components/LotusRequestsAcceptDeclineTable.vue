@@ -62,7 +62,7 @@ const declineRequest = async (id) => {
                     <tr>
                         <th class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Aanvraag</th>
                         <th class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Datum</th>
-                        <th class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Plaats</th>
+                        <th class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Plaatsnaam</th>
                         <th class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Tijd</th>
                         <th class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Plekken</th>
                         <th class="px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-4">Accepteren/Afwijzen</th>
@@ -109,7 +109,7 @@ const declineRequest = async (id) => {
                         <div><span class="font-semibold">Aanvraag:</span> {{ request.name }}</div>
                         <hr class="my-1">
                         <div><span class="font-semibold">Datum:</span> {{ new Date(request.date).toLocaleDateString('nl-NL') }}</div>
-                        <div><span class="font-semibold">Plaats:</span> {{ request.city }}</div>
+                        <div><span class="font-semibold">Plaatsnaam:</span> {{ request.city }}</div>
                         <div><span class="font-semibold">Tijd:</span> {{ formatTime(request.arrival_time) }} - {{ formatTime(request.end_time) }}</div>
                         <div><span class="font-semibold">Plekken:</span> {{ request.filled_spots }} / <strong>{{ request.amount_lotus }}</strong></div>
                         <div class="flex items-center gap-2 mt-2">
