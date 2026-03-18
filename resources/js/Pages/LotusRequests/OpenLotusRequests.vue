@@ -8,9 +8,12 @@ import {computed, defineProps} from 'vue';
 
 const props = defineProps({
     lotusRequests: Array, // Definieer de lotusRequests prop
-    penningmeesterAllLotusRequests: Array,
+    penningmeesterExpiredRequests: Array,
+    penningmeesterFutureRequests: Array,
     success: String,
 });
+
+console.log(props);
 
 
 
@@ -49,10 +52,17 @@ const isCoordinator = computed(() => userRoles.value.includes("coordinator"));
             </div>
         </div>
 
-        <div v-if="props.penningmeesterAllLotusRequests.length > 0" class="pb-8">
+        <div v-if="props.penningmeesterFutureRequests.length > 0" class="pb-8">
             <div class="mx-auto px-2 sm:px-6 lg:px-8">
                 <!-- Gebruik het LotusRequestTable component -->
-                <LotusRequestTable :lotusRequests="props.penningmeesterAllLotusRequests" tableTitle="Alle Lotus Aanvragen" />
+                <LotusRequestTable :lotusRequests="props.penningmeesterFutureRequests" tableTitle="Aankomende Lotus Aanvragen" />
+            </div>
+        </div>
+
+        <div v-if="props.penningmeesterExpiredRequests.length > 0" class="pb-8">
+            <div class="mx-auto px-2 sm:px-6 lg:px-8">
+                <!-- Gebruik het LotusRequestTable component -->
+                <LotusRequestTable :lotusRequests="props.penningmeesterExpiredRequests" tableTitle="Afgeronde Lotus Aanvragen" />
             </div>
         </div>
     </AuthenticatedLayout>

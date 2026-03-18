@@ -17,6 +17,29 @@ class LotusRequestController extends Controller
     public function store(Request $request)
     {
 
+        $user = auth()->user();
+
+        // Haal billing info op
+        $billingInfo = $user->billingInfo;
+
+        if ($user->roles->contains('name', 'klant')) {
+            // Controleer of deze bestaat en verplichte velden heeft
+            if (!$billingInfo ||
+                empty($billingInfo->billing_name) ||
+                empty($billingInfo->billing_contactperson) ||
+                empty($billingInfo->billing_phone) ||
+                empty($billingInfo->billing_email) ||
+                empty($billingInfo->billing_address) ||
+                empty($billingInfo->billing_zipcode) ||
+                empty($billingInfo->billing_city)
+            ) {
+                return back()->withErrors([
+                    'billing' => 'Aanvraag niet gelukt. Vul eerst je factuurgegevens in via de factuurpagina.'
+                ]);
+            }
+        }
+
+
         $requestNumberService = new RequestNumberService;
         $requestNumber = $requestNumberService->getNextRequestNumber();
         $validated = $request->validate([
@@ -49,7 +72,7 @@ class LotusRequestController extends Controller
 
         // Redirect naar het overzicht van open aanvragen met een succesmelding
 //        return redirect()->route('lotus-requests.openlotusrequests')->with('success', 'Lotus-aanvraag succesvol aangemaakt.');
-        $user = auth()->user();
+//        $user = auth()->user();
 
         if ($user->roles->contains('name', 'klant')) {
             return redirect()->route('dashboard')->with('success', 'Lotus-aanvraag succesvol aangemaakt.');
@@ -75,16 +98,35 @@ class LotusRequestController extends Controller
             ->orderBy('date', 'asc') // Sorteert oplopend op datum
             ->get();
 
+        // De huidige datum ophalen
+        $today = now()->startOfDay();
+
         if ($user->roles->contains('name', 'admin') || $user->roles->contains('name', 'penningmeester')){
-            $allLotusRequests = LotusRequest::orderBy('date', 'desc')->get();
+//            $allLotusRequests = LotusRequest::orderBy('date', 'desc')->get();
+
+            $today = now()->startOfDay();
+
+            $expiredLotusRequests = LotusRequest::whereDate('date', '<', $today)
+                ->orderBy('date', 'desc')
+                ->get();
+
+            $futureLotusRequests = LotusRequest::whereDate('date', '>=', $today)
+                ->orderBy('date', 'asc')
+                ->get();
+
+
         } else {
-            $allLotusRequests = [];
+//            $allLotusRequests = [];
+            $expiredLotusRequests = [];
+            $futureLotusRequests = [];
         }
 
         // Geef de aanvragen door aan de Inertia view
         return Inertia::render('LotusRequests/OpenLotusRequests', [
             'lotusRequests' => $lotusRequests,
-            'penningmeesterAllLotusRequests' => $allLotusRequests,
+//            'penningmeesterAllLotusRequests' => $allLotusRequests,
+            'penningmeesterExpiredRequests' => $expiredLotusRequests,
+            'penningmeesterFutureRequests' => $futureLotusRequests,
         ]);
     }
 

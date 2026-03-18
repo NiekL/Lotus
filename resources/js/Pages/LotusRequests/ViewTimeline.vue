@@ -229,7 +229,17 @@ const copyAllUserInfo = async () => {
 <!--                    <p class="text-sm italic mb-2">{{ request.description }}</p>-->
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm border border-gray-300">
+                        <table class="w-full table-fixed text-sm border border-gray-300">
+
+                            <!-- Zorgt voor consistente kolombreedtes -->
+                            <colgroup>
+                                <col class="min-w-[150px] w-1/5">
+                                <col class="min-w-[140px] w-1/5">
+                                <col class="min-w-[80px] w-1/5">
+                                <col class="min-w-[120px] w-1/5">
+                                <col class="min-w-[200px] w-1/5">
+                            </colgroup>
+
                             <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
                             <tr class="text-left">
                                 <th class="px-2 py-1">Naam</th>
@@ -239,13 +249,14 @@ const copyAllUserInfo = async () => {
                                 <th class="px-2 py-1">Feedback</th>
                             </tr>
                             </thead>
+
                             <tbody>
                             <tr v-for="user in request.users" :key="user.id" class="border-t">
-                                <td class="px-2 py-1 whitespace-nowrap">{{ user.name }}</td>
-                                <td class="px-2 py-1">{{ user.pivot.user_played_time ? `${user.pivot.user_played_time} min (${(user.pivot.user_played_time / 60).toFixed(1)} uur)` : 'nvt' }}</td>
-                                <td class="px-2 py-1">{{ user.pivot.user_amount_km ?? 'nvt' }}</td>
-                                <td class="px-2 py-1">{{ user.pivot.user_expenses !== null ? `€${user.pivot.user_expenses}` : 'nvt' }}</td>
-                                <td class="px-2 py-1">{{ user.pivot.user_feedback ?? 'nvt' }}</td>
+                                <td class="px-2 py-1 whitespace-nowrap truncate">{{ user.name }}</td>
+                                <td class="px-2 py-1 whitespace-nowrap">{{user.pivot.user_played_time ? `${user.pivot.user_played_time} min (${(user.pivot.user_played_time / 60).toFixed(1)} uur)` : 'nvt' }}</td>
+                                <td class="px-2 py-1 whitespace-nowrap">{{ user.pivot.user_amount_km ?? 'nvt' }}</td>
+                                <td class="px-2 py-1 whitespace-nowrap">{{user.pivot.user_expenses !== null ? `€${user.pivot.user_expenses}` : 'nvt' }}</td>
+                                <td class="px-2 py-1 truncate">{{ user.pivot.user_feedback ?? 'nvt' }}</td>
                             </tr>
                             </tbody>
                         </table>

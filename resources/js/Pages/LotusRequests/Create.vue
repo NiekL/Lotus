@@ -48,6 +48,8 @@ form.rate_group = '1';
 const page = usePage();
 const userRoles = computed(() => page.props.auth.user?.roles || []);
 
+const errors = computed(() => page.props.errors || {});
+
 const isAdmin = computed(() => userRoles.value.includes("admin"));
 const isCoordinator = computed(() => userRoles.value.includes("coordinator"));
 const isKlant = computed(() => userRoles.value.includes("klant"));
@@ -108,6 +110,22 @@ const correctTime = (field) => {
         </template>
 
         <div class="py-8">
+            <div v-if="errors.billing" class="pb-8">
+                <div class="mx-auto px-2 sm:px-6 lg:px-8">
+                    <div class="bg-red-50 shadow-sm rounded-md border border-red-500">
+                        <div class="p-4 rounded">
+                            {{ errors.billing }}
+                            <a
+                                :href="route('profile.invoiceinfo')"
+                                class="ml-2 underline text-red-700 font-semibold"
+                            >
+                                Ga naar factuurgegevens
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="mx-auto px-2 sm:px-6 lg:px-8 space-y-6">
                     <form @submit.prevent="submit" class=" space-y-6">
                         <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg space-y-6">
